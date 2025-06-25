@@ -123,44 +123,73 @@ function App() {
   } 
 
   return (
-    <div>
-      {mensagem && (
-        <div style={{
-          backgroundColor: '#d4edda',
-          color: '#155724',
-          padding: '10px',
-          borderRadius: '8px',
-          marginBottom: '16px',
-          textAlign: 'center',
-          fontWeight: 'bold',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          {mensagem}
-        </div>
-      )}
+    <div
+      style={{
+        background: 'linear-gradient(180deg, #f0b9AA, #c4594b)',
+        minHeight: '100vh',
+        minWidth: '100vw',
+        padding: '40px 20px',
+        overflowX: 'hidden',
+        display: 'flex',
+        gap: '16px',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        fontFamily: 'sans-serif',
+        color: '#fff',
+      }}
+    >
+      <div style={{
+        width: '100%',
+        maxWidth: '900px',
+        padding: '0 20px',
+        boxsizing: 'border-box',
+      }}>
 
-      
-      <h1>Painel do barbeiro</h1>
+        {mensagem && (
+          <div style={{
+            backgroundColor: '#d4edda',
+            color: '#155724',
+            padding: '10px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}>
+            {mensagem}
+          </div>
+        )}
 
-      <div style={{ marginBottom: '20px' }}>
-        <AgendamentoForm 
-          onCriar={criarAgendamento}
-        />
+        <h1
+          style={{
+            textAlign: 'center',
+            marginBottom: '24px',
+            fontSize: '32px',
+            color: '#4b1623',
+          }}
+        >Painel do Barbeiro</h1>
+
+          <div style={{ marginBottom: '20px' }}>
+            <AgendamentoForm 
+              onCriar={criarAgendamento}
+            />
+          </div>
+
+          {agendamentos.length === 0 ? (
+            <p> Carregando agendamentos...</p>
+          ) : (
+            agendamentos.map((item) => (
+                <AgendamentoItem
+                  key={item.id}
+                  item={item}
+                  onEditar={editarAgendamento}
+                  onCancelar={cancelarAgendamento}
+                  onConfirmar={confirmarAgendamento}
+                />  
+            ))
+          )}
+        
       </div>
-
-      {agendamentos.length === 0 ? (
-        <p> Carregando agendamentos...</p>
-      ) : (
-        agendamentos.map((item) => (
-            <AgendamentoItem
-              key={item.id}
-              item={item}
-              onEditar={editarAgendamento}
-              onCancelar={cancelarAgendamento}
-              onConfirmar={confirmarAgendamento}
-            />  
-        ))
-      )}
     </div>
   )
 }
