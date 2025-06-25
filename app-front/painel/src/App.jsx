@@ -1,9 +1,35 @@
 import { useState, useEffect } from 'react'
+import AgendamentoItem from './components/AgendamentoItem';
+import AgendamentoForm from './components/AgendamentoForm';
+
+
 
 
 function App() {
   const [agendamentos, setAgendamentos] = useState([]);
   const [mensagem, setMensagem] = useState('');
+ 
+
+
+  const criarAgendamento = (agendamento) => {
+   
+    fetch('http://localhost:3000/agendamentos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(agendamento),
+    })
+    .then((res) => res.json())
+    .then((dados) => {
+      setAgendamentos((prev) => [...prev, dados.agendamento]);
+      exibirMensagem(dados.message);
+    })
+    .catch((err) => {
+      console.error('Erro ao criar agendamento:', err);
+      })
+  
+  }
 
   const exibirMensagem = (texto) => {
     setMensagem(texto);
@@ -75,6 +101,27 @@ function App() {
     
   };
 
+  const editarAgendamento = (id, dadosAtualizados) => {
+    fetch(`http://localhost:3000/agendamentos/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dadosAtualizados),
+    })
+    .then((res) => res.json())
+    .then((dados) => {
+      setAgendamentos((prev) =>
+        prev.map((item) => (item.id === id ? dados.agendamento : item))
+      );
+      exibirMensagem(dados.message);
+    })
+    .catch((err) => {
+      console.error('Erro ao editar agendamento:', err);
+      exibirMensagem('Erro ao editar agendamento. Tente novamente.');
+    });
+  } 
+
   return (
     <div>
       {mensagem && (
@@ -92,38 +139,28 @@ function App() {
         </div>
       )}
 
+      
       <h1>Painel do barbeiro</h1>
+
+      <div style={{ marginBottom: '20px' }}>
+        <AgendamentoForm 
+          onCriar={criarAgendamento}
+        />
+      </div>
+
       {agendamentos.length === 0 ? (
         <p> Carregando agendamentos...</p>
       ) : (
         agendamentos.map((item) => (
-          <div key={item.id}>
-          
-            <h3>{item.nome}</h3>
-            
-            <p>Serviço: {item.servico}</p>
-            <p>Horário: {item.horario}</p>
-            <p>Status: {item.situacao}</p>
-            
-            {item.situacao.toLowerCase() === 'pendente' && (
-              <button 
-                onClick={() => confirmarAgendamento(item.id)}>
-                  Confirmar
-              </button>
-            )}
-
-            <button 
-              onClick={() => cancelarAgendamento(item.id)}>
-                Cancelar
-            </button>
-            
-            <hr />
-          
-          </div>
+            <AgendamentoItem
+              key={item.id}
+              item={item}
+              onEditar={editarAgendamento}
+              onCancelar={cancelarAgendamento}
+              onConfirmar={confirmarAgendamento}
+            />  
         ))
       )}
-
-      
     </div>
   )
 }
