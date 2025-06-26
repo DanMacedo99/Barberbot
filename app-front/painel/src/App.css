@@ -1,0 +1,34 @@
+.app-container {
+    background: linear-gradient(180deg, #f0b9aa, #c4594b);
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: sans-serif;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.app-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    text-align: center;
+    color: #4b1623;
+}
+
+.toast-message {
+    background: linear-gradient(180deg, #f0b96b, #c4594b);
+    color: #4b1623;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+    max-width: 600px;
+    width: 100%;
+}

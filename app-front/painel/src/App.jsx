@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react'
 import AgendamentoItem from './components/AgendamentoItem';
 import AgendamentoForm from './components/AgendamentoForm';
-
+import './App.css';
 
 
 
 function App() {
   const [agendamentos, setAgendamentos] = useState([]);
   const [mensagem, setMensagem] = useState('');
- 
+
 
 
   const criarAgendamento = (agendamento) => {
-   
+
     fetch('http://localhost:3000/agendamentos', {
       method: 'POST',
       headers: {
@@ -20,15 +20,15 @@ function App() {
       },
       body: JSON.stringify(agendamento),
     })
-    .then((res) => res.json())
-    .then((dados) => {
-      setAgendamentos((prev) => [...prev, dados.agendamento]);
-      exibirMensagem(dados.message);
-    })
-    .catch((err) => {
-      console.error('Erro ao criar agendamento:', err);
+      .then((res) => res.json())
+      .then((dados) => {
+        setAgendamentos((prev) => [...prev, dados.agendamento]);
+        exibirMensagem(dados.message);
       })
-  
+      .catch((err) => {
+        console.error('Erro ao criar agendamento:', err);
+      })
+
   }
 
   const exibirMensagem = (texto) => {
@@ -47,28 +47,28 @@ function App() {
       .catch((err) => {
         console.error('Erro ao buscar agendamentos:', err);
       });
-  
+
   }, [])
 
-  const cancelarAgendamento =(id) => {
+  const cancelarAgendamento = (id) => {
     fetch(`http://localhost:3000/agendamentos/${id}`, {
       method: 'DELETE',
     })
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      } else {
-       console.error('Erro ao cancelar agendamento:');  
-      }
-    })
-    .then((dados) => {
-      setAgendamentos((prev) => prev.filter((item) => item.id !== id));
-      exibirMensagem(dados.message);
-    })
-    .catch((err) => {
-      console.error('Erro ao cancelar agendamento:', err);
-    });
-    
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          console.error('Erro ao cancelar agendamento:');
+        }
+      })
+      .then((dados) => {
+        setAgendamentos((prev) => prev.filter((item) => item.id !== id));
+        exibirMensagem(dados.message);
+      })
+      .catch((err) => {
+        console.error('Erro ao cancelar agendamento:', err);
+      });
+
   }
 
   const confirmarAgendamento = (id) => {
@@ -89,16 +89,16 @@ function App() {
       },
       body: JSON.stringify(agendamentoAtualizado),
     })
-    .then((res) => res.json())
-    .then((dados) => {
-      setAgendamentos((prev) =>
-        prev.map((item) => (item.id === id ? dados.agendamento : item))
-      );
-      exibirMensagem(dados.message);
-    })
-     
-    .catch((err) => console.error('Erro ao confirmar agendamento:', err));
-    
+      .then((res) => res.json())
+      .then((dados) => {
+        setAgendamentos((prev) =>
+          prev.map((item) => (item.id === id ? dados.agendamento : item))
+        );
+        exibirMensagem(dados.message);
+      })
+
+      .catch((err) => console.error('Erro ao confirmar agendamento:', err));
+
   };
 
   const editarAgendamento = (id, dadosAtualizados) => {
@@ -109,86 +109,57 @@ function App() {
       },
       body: JSON.stringify(dadosAtualizados),
     })
-    .then((res) => res.json())
-    .then((dados) => {
-      setAgendamentos((prev) =>
-        prev.map((item) => (item.id === id ? dados.agendamento : item))
-      );
-      exibirMensagem(dados.message);
-    })
-    .catch((err) => {
-      console.error('Erro ao editar agendamento:', err);
-      exibirMensagem('Erro ao editar agendamento. Tente novamente.');
-    });
-  } 
+      .then((res) => res.json())
+      .then((dados) => {
+        setAgendamentos((prev) =>
+          prev.map((item) => (item.id === id ? dados.agendamento : item))
+        );
+        exibirMensagem(dados.message);
+      })
+      .catch((err) => {
+        console.error('Erro ao editar agendamento:', err);
+        exibirMensagem('Erro ao editar agendamento. Tente novamente.');
+      });
+  }
 
   return (
     <div
-      style={{
-        background: 'linear-gradient(180deg, #f0b9AA, #c4594b)',
-        minHeight: '100vh',
-        minWidth: '100vw',
-        padding: '40px 20px',
-        overflowX: 'hidden',
-        display: 'flex',
-        gap: '16px',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        fontFamily: 'sans-serif',
-        color: '#fff',
-      }}
+      className='app-container'
     >
-      <div style={{
-        width: '100%',
-        maxWidth: '900px',
-        padding: '0 20px',
-        boxsizing: 'border-box',
-      }}>
+      <div >
 
         {mensagem && (
-          <div style={{
-            backgroundColor: '#d4edda',
-            color: '#155724',
-            padding: '10px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            textAlign: 'center',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}>
+          <div className='toast-message'>
             {mensagem}
           </div>
         )}
 
-        <h1
-          style={{
-            textAlign: 'center',
-            marginBottom: '24px',
-            fontSize: '32px',
-            color: '#4b1623',
-          }}
+        <h1 className='app-title'
         >Painel do Barbeiro</h1>
 
-          <div style={{ marginBottom: '20px' }}>
-            <AgendamentoForm 
-              onCriar={criarAgendamento}
-            />
-          </div>
+        <div >
+          <AgendamentoForm
+            onCriar={criarAgendamento}
+          />
+        </div>
 
-          {agendamentos.length === 0 ? (
-            <p> Carregando agendamentos...</p>
-          ) : (
-            agendamentos.map((item) => (
-                <AgendamentoItem
-                  key={item.id}
-                  item={item}
-                  onEditar={editarAgendamento}
-                  onCancelar={cancelarAgendamento}
-                  onConfirmar={confirmarAgendamento}
-                />  
-            ))
-          )}
-        
+        {agendamentos.length === 0 ? (
+          <p> Carregando agendamentos...</p>
+        ) : (
+          agendamentos.map((item) => (
+            <>
+              <h1 className='app-title'>Agendados</h1>
+              <AgendamentoItem
+                key={item.id}
+                item={item}
+                onEditar={editarAgendamento}
+                onCancelar={cancelarAgendamento}
+                onConfirmar={confirmarAgendamento}
+              />
+            </>
+          ))
+        )}
+
       </div>
     </div>
   )
