@@ -4,8 +4,8 @@ const {
     listarAgendamento,
     criarAgendamento,
     atualizarAgendamento,
-    excluirAgendamento,
-} = require('../controllers/agendamentosController');
+    deletarAgendamento,
+} = require('../controllers/agendamentoController');
 
 // Rota para listar agendamentos
 router.get('/agendamentos', listarAgendamento);
@@ -17,7 +17,7 @@ router.post('/agendamentos', criarAgendamento);
 router.put('/agendamentos/:id', atualizarAgendamento);
 
 // Rota para excluir um agendamento
-router.delete('/agendamentos/:id', excluirAgendamento);
+router.delete('/agendamentos/:id', deletarAgendamento);
 
 // Exporta o roteador para ser usado na aplicação principal
 module.exports = router;
