@@ -19,5 +19,10 @@ router.put('/agendamentos/:id', atualizarAgendamento);
 // Rota para excluir um agendamento
 router.delete('/agendamentos/:id', deletarAgendamento);
 
+router.get('/agendamentos', (req, res) => {
+    const agendamentos = require('..data/agendamentos');
+    res.json(agendamentos);
+})
+
 // Exporta o roteador para ser usado na aplicação principal
 module.exports = router;

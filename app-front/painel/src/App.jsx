@@ -13,12 +13,17 @@ function App() {
 
   const criarAgendamento = (agendamento) => {
 
+    const agendamentoComStatus = {
+      ...agendamento,
+      status: 'pendente'
+    }
+
     fetch('http://localhost:3000/agendamentos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(agendamento),
+      body: JSON.stringify(agendamentoComStatus),
     })
       .then((res) => res.json())
       .then((dados) => {
@@ -79,7 +84,7 @@ function App() {
 
     const agendamentoAtualizado = {
       ...agendamento,
-      situacao: 'confirmado',
+      status: 'confirmado',
     };
 
     fetch(`http://localhost:3000/agendamentos/${id}`, {
@@ -143,21 +148,21 @@ function App() {
           />
         </div>
 
+        <h1 className='app-title'>Agendados</h1>
+
         {agendamentos.length === 0 ? (
           <p> Carregando agendamentos...</p>
         ) : (
           agendamentos.map((item) => (
-            <>
-              <h1 className='app-title'>Agendados</h1>
-              <AgendamentoItem
-                key={item.id}
-                item={item}
-                onEditar={editarAgendamento}
-                onCancelar={cancelarAgendamento}
-                onConfirmar={confirmarAgendamento}
-              />
-            </>
+            <AgendamentoItem
+              key={item.id}
+              item={item}
+              onEditar={editarAgendamento}
+              onCancelar={cancelarAgendamento}
+              onConfirmar={confirmarAgendamento}
+            />
           ))
+
         )}
 
       </div>

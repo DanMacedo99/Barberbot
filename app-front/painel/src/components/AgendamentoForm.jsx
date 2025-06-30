@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './AgendamentoForm.css'; 
+import './AgendamentoForm.css';
 
 function AgendamentoForm({ onCriar }) {
     const [formulario, setFormulario] = useState({
@@ -18,10 +18,10 @@ function AgendamentoForm({ onCriar }) {
         if (!nome || !servico || !horario) {
             alert('Preencha todos os campos!');
             return;
-        }  
+        }
 
         onCriar({
-            ...formulario, situacao: 'pendente'
+            ...formulario, status: 'pendente'
         });
 
         setFormulario({
@@ -32,7 +32,7 @@ function AgendamentoForm({ onCriar }) {
 
     };
 
-    return(
+    return (
         <div className='agendamento-form'>
             <h2>Novo Agendamento</h2>
             <input
@@ -54,9 +54,9 @@ function AgendamentoForm({ onCriar }) {
                 name="horario"
                 placeholder="Horário"
                 value={formulario.horario}
-                onChange={handleChange}         
+                onChange={handleChange}
             />
-            <button onClick={handleSubmit}>Criar Agendamento</button> 
+            <button onClick={handleSubmit}>Criar Agendamento</button>
         </div>
     );
 

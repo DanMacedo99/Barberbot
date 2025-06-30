@@ -22,15 +22,6 @@ function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
         <div>
           <input
             type='text'
-            style={{
-              padding: '8px',
-              marginBottom: '10px',
-              borderRadius: '8px',
-              border: 'none',
-              width: '95%',
-              maxWidth: '800px',
-              fontSize: '14px'
-            }}
             value={formulario.nome}
             onChange={(e) =>
               setFormulario({
@@ -41,15 +32,6 @@ function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
           />
           <input
             type='text'
-            style={{
-              padding: '8px',
-              marginBottom: '10px',
-              borderRadius: '8px',
-              border: 'none',
-              width: '95%',
-              maxWidth: '800px',
-              fontSize: '14px'
-            }}
             value={formulario.servico}
             onChange={(e) =>
               setFormulario({
@@ -60,15 +42,6 @@ function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
           />
           <input
             type='time'
-            style={{
-              padding: '8px',
-              marginBottom: '10px',
-              borderRadius: '8px',
-              border: 'none',
-              width: '95%',
-              maxWidth: '800px',
-              fontSize: '14px'
-            }}
             value={formulario.horario}
             onChange={(e) =>
               setFormulario({
@@ -92,13 +65,14 @@ function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
         <>
           <p>Serviço: {item.servico}</p>
           <p>Horário: {item.horario}</p>
-          <p>Status: {item.situacao}</p>
+          <p>Status: {item.status}</p>
 
-          {item.situacao.toLowerCase() === 'pendente' && (
+          {item.status.toLowerCase() === 'pendente' && (
             <button
               className="confirmar"
               onClick={() => onConfirmar(item.id)}
-            >Confirmar</button>
+            >Confirmar
+            </button>
           )}
 
           <button

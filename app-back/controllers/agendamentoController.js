@@ -16,16 +16,19 @@ function criarAgendamento(req, res) {
         nome,
         servico,
         horario,
-        situacao: 'pendente'
+        status: 'pendente'
     };
 
     agendamentos.push(novoAgendamento);
-    res.status(201).json(novoAgendamento);
+    res.status(201).json({
+        message: 'Agendamento criado com sucesso',
+        agendamento: novoAgendamento
+    });
 }
 
 function atualizarAgendamento(req, res) {
     const id = req.params.id;
-    const { nome, servico, horario, situacao } = req.body;
+    const { nome, servico, horario, status } = req.body;
     const index = agendamentos.findIndex(a => a.id === id);
 
     if (index === -1) {
@@ -37,10 +40,13 @@ function atualizarAgendamento(req, res) {
         nome: nome || agendamentos[index].nome,
         servico: servico || agendamentos[index].servico,
         horario: horario || agendamentos[index].horario,
-        situacao: situacao || agendamentos[index].situacao
+        status: status || agendamentos[index].status
     };
 
-    res.json(agendamentos[index]);
+    res.json({
+        message: 'Agendamento atualizado com sucesso',
+        agendamento: agendamentos[index]
+    });
 }
 
 function deletarAgendamento(req, res) {

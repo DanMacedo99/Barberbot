@@ -1,6 +1,8 @@
-const twilio = require('twilio')
-const mensagens = require('../data/mensagens')
-const fluxoAgendamentos = require('../data/fluxoAgendamento')
+const twilio = require('twilio');
+const mensagens = require('../data/mensagens');
+const fluxoAgendamentos = require('../data/fluxoAgendamento');
+const agendamentos = require('../data/agendamentos');
+
 
 
 function receberMensagemWhatsapp(req, res) {
@@ -54,14 +56,14 @@ function receberMensagemWhatsapp(req, res) {
             const agendamento = {
                 id: Date.now().toString(),
                 numero,
-                nomePerfil,
+                nome: nomePerfil || numero,
                 servico: fluxoAgendamentos[numero].servico,
                 horario: fluxoAgendamentos[numero].horario,
                 status: 'pendente',
                 dataHoraCriacao: new Date().toISOString()
             };
 
-            mensagens.push(agendamento);
+            agendamentos.push(agendamento);
 
             delete fluxoAgendamentos[numero];
 
