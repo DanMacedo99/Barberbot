@@ -1,0 +1,8 @@
+# Backend
+/app-back/node_modules
+/app-back/.env
+
+# Frontend
+/app-front/node_modules
+/app-front/.env
+/app-front/build

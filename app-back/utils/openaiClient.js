@@ -23,13 +23,15 @@ async function interpretarMensagem(mensagem) {
         messages: [
             {
                 role: "system",
-                content: `Você é um assistente que extrai informações de agendamento de mensagens livres em português. Sempre responda APENAS com um JSON válido neste formato: 
-                {
-                    "servico": "",
-                    "data": "",
-                    "hora": ""
-                }
-                Se não conseguir identificar algum dado, coloque "null".`.trim()
+                content: `Você é um assistente que extrai informações de agendamento de mensagens livres em português. Responda APENAS com um JSON puro e válido, sem formatação, sem texto extra, sem crases e sem markdown.
+                Formato EXATO:
+                    {
+                        "servico": "",
+                        "data": "",
+                        "hora": ""
+                    }
+                Se não conseguir identificar algum dado, coloque "null".
+                Não escreva nada além do JSON.`.trim()
             },
             {
                 role: "user",
@@ -42,7 +44,13 @@ async function interpretarMensagem(mensagem) {
     const resposta = completion.choices[0].message.content;
 
     try {
-        const dados = JSON.parse(resposta);
+
+        const jsonLimpo = resposta
+            .replace(/```json/gi, "")
+            .replace(/```/g, "")
+            .trim();
+
+        const dados = JSON.parse(jsonLimpo);
         return dados;
     } catch (error) {
         console.error("Erro ao converterJSON:", error);

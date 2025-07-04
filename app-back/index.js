@@ -18,7 +18,6 @@ const whatsappWebhook = require('./routes/whatsappWebhook');
 app.use('/', whatsappWebhook);
 
 
-
 app.get('/', (req, res) => {
     res.send('Olá, este é o back end');
 });
