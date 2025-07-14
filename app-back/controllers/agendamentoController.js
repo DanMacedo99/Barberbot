@@ -36,9 +36,7 @@ async function atualizarAgendamento(req, res) {
         return res.status(404).json({ error: 'Agendamento não encontrado.' });
     };
 
-    const agendamentoAtual = agendamentos[index];
-    const horarioAntigo = agendamentoAtual.horario;
-    const statusAntigo = agendamentoAtual.status;
+    const agendamentoAntigo = { ...agendamentos[index] }
 
     agendamentos[index] = {
         ...agendamentos[index],
@@ -48,26 +46,28 @@ async function atualizarAgendamento(req, res) {
         status: status || agendamentos[index].status
     };
 
-
+    const agendamentoNovo = agendamentos[index];
     let mensagemCliente = "";
 
 
 
-    if (agendamentos[index].status === 'confirmado') {
+    if (
+        agendamentoAntigo.status !== agendamentoNovo.status &&
+        agendamentoNovo.status === 'confirmado'
+    ) {
+        mensagemCliente = `Olá, ${agendamentoNovo.nome}! Seu agendamento foi confirmado \n\nServiço: ${agendamentoNovo.servico}\nHorário: ${agendamentoNovo.horario}\n\nObrigado!`
 
-        mensagemCliente = `Olá, ${agendamentos[index].nome}! Seu agendamento foi confirmado \n\nServiço: ${agendamentos[index].servico}\nHorário: ${agendamentos[index].horario}\n\nObrigado!`
-
-    } else if (horario && horario !== horarioAntigo) {
-        mensagemCliente = `Olá ${agendamentos[index].nome}. O horario do seu agendamento foi alterado \n\n de: ${horarioAntigo} para: ${agendamentos[index].horario}`
+    } else if (agendamentoAntigo.horario !== agendamentoNovo.horario) {
+        mensagemCliente = `Olá ${agendamentos[index].nome}. O horario do seu agendamento foi alterado \n\n de: ${agendamentoAntigo.horario} para: ${agendamentoNovo.horario}\n\nObrigado!`
     }
 
     if (mensagemCliente) {
         try {
             await enviarMensagemWhatsapp(
-                agendamentos[index].numero,
+                agendamentoNovo.numero,
                 mensagemCliente
             );
-            console.log(`mensagem enviada para ${agendamentos[index].numero}`)
+            console.log(`mensagem enviada para ${agendamentoNovo.numero}`)
         } catch (error) {
             console.error(`Error ao enviar mensagem pelo WhatsApp:`, error);
         }
@@ -75,7 +75,7 @@ async function atualizarAgendamento(req, res) {
 
     res.json({
         message: 'Agendamento atualizado com sucesso',
-        agendamento: agendamentos[index]
+        agendamento: agendamentoNovo
     });
 }
 
@@ -83,35 +83,24 @@ async function deletarAgendamento(req, res) {
     const id = req.params.id;
     const index = agendamentos.findIndex(a => a.id === id);
 
-
-
-    mensagemCliente = `Olá, Seu agendamento foi cancelado. \nSe precisar, estamos à deisposição para remarcar.`
-
-
     if (index === -1) {
         return res.status(404).json({ error: 'Agendamento não encontrado.' });
-    } else if (mensagemCliente) {
-        try {
-            await enviarMensagemWhatsapp(
-                agendamentos[index].numero,
-                mensagemCliente
-            );
-            console.log(`mensagem enviada para ${agendamentos[index].numero}`)
-        } catch (error) {
-            console.error(`Error ao enviar mensagem pelo WhatsApp:`, error);
-        }
-    };
+    }
+
+    const agendamento = agendamentos[index];
+    const numero = agendamento.numero;
+
+    mensagemCliente = `Olá ${agendamento.nome}, Seu agendamento foi cancelado. \nSe precisar, estamos à deisposição para remarcar.`
+
+    try {
+        await enviarMensagemWhatsapp(numero, mensagemCliente);
+        console.log(`mensagem enviada para ${numero}`);
+    } catch (error) {
+        console.error(`Error ao enviar mensagem pelo WhatsApp:`, error.message);
+    }
 
     const deletado = agendamentos.splice(index, 1);
-
-
     res.json({ mensagem: 'Agendamento excluído com sucesso.', deletado });
-
-
-
-
-
-
 
 }
 
