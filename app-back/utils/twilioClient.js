@@ -20,7 +20,6 @@ async function enviarMensagemWhatsapp(destino, mensagem) {
             body: mensagem
         });
 
-        console.log("este é o response:", response)
         console.log("Mensagem enviada com sucesso:", response.sid);
     } catch (error) {
         console.error("Erro ao enviar mensagem:", error.message);

@@ -1,9 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socket = require('./utils/socket');
+
 const app = express();
 const PORT = 3000;
-
 
 
 app.use(cors());
@@ -22,6 +24,11 @@ app.get('/', (req, res) => {
     res.send('Olá, este é o back end');
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
+const server = http.createServer(app);
+
+const io = socket.init(server);
+
+server.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+})
+

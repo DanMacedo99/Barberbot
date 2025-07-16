@@ -3,6 +3,7 @@ const mensagens = require('../data/mensagens');
 const fluxoAgendamentos = require('../data/fluxoAgendamento');
 const agendamentos = require('../data/agendamentos');
 const { interpretarMensagem } = require("../utils/openaiClient")
+const { getIO } = require('../utils/socket');
 
 
 
@@ -75,6 +76,10 @@ async function receberMensagemWhatsapp(req, res) {
         };
 
         agendamentos.push(agendamento);
+
+        const io = getIO();
+        io.emit('agendamento-criado', agendamento); // Emitindo o evento de novo agendamento para todos os clientes conectados
+
         delete fluxoAgendamentos[numero];
 
         twiml.message(`Fechado, ${agendamento.nome}! Certo recebemos o seu pedido de agendamento:\n\n Serviço: ${agendamento.servico}\n Data e hora: ${agendamento.horario}\n\nVamos confirmar e entramos em contato!`);

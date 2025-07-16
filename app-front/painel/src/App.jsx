@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { io } from 'socket.io-client';
 import AgendamentoItem from './components/AgendamentoItem';
 import AgendamentoForm from './components/AgendamentoForm';
 import './App.css';
+
 
 
 
@@ -9,7 +11,7 @@ function App() {
   const [agendamentos, setAgendamentos] = useState([]);
   const [mensagem, setMensagem] = useState('');
 
-
+  const criouViaPainel = useRef(false);
 
   const criarAgendamento = (agendamento) => {
 
@@ -27,7 +29,10 @@ function App() {
     })
       .then((res) => res.json())
       .then((dados) => {
-        setAgendamentos((prev) => [...prev, dados.agendamento]);
+        console.log('Agendamento criado pelo painel:', dados.agendamento);
+
+        criouViaPainel.current = true;
+
         exibirMensagem(dados.message);
       })
       .catch((err) => {
@@ -42,6 +47,44 @@ function App() {
       setMensagem('');
     }, 3000);
   }
+
+  useEffect(() => {
+    const socket = io('http://localhost:3000');
+
+    socket.on('connect', () => {
+      console.log('Conectado ao socket.io-client', socket.id);
+    })
+
+    socket.on('agendamento-criado', (novoAgendamento) => {
+      console.log('Novo agendamento recebido via socket:', novoAgendamento);
+
+      setAgendamentos((prev) => {
+        const jaExiste = prev.some((item) => item.id === novoAgendamento.id);
+        if (jaExiste) {
+          console.log('Agendamento já existe, não adicionando novamente.');
+
+          return prev;
+        }
+
+        console.log('novo, adicionando agendamento')
+        return [...prev, novoAgendamento];
+
+      })
+
+      if (criouViaPainel.current) {
+        exibirMensagem('Agendamento criado com sucesso!');
+        criouViaPainel.current = false;
+        return;
+      }
+
+      exibirMensagem('Novo agendamento recebido em tempo real!');
+    });
+
+    return () => {
+      socket.disconnect();
+      console.log('Desconectado do socket.io-client');
+    }
+  }, []);
 
   useEffect(() => {
     fetch('http://localhost:3000/agendamentos')

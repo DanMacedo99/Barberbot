@@ -1,6 +1,8 @@
 const agendamentos = require('../data/agendamentos');
 const { enviarMensagemWhatsapp } = require('../utils/twilioClient')
 
+
+
 function listarAgendamento(req, res) {
     res.json(agendamentos);
 }
@@ -21,6 +23,11 @@ function criarAgendamento(req, res) {
     };
 
     agendamentos.push(novoAgendamento);
+
+
+    const io = require('../utils/socket').getIO();
+    io.emit('agendamento-criado', novoAgendamento);// Emitindo o evento de novo agendamento para todos os clientes conect
+
     res.status(201).json({
         message: 'Agendamento criado com sucesso',
         agendamento: novoAgendamento
