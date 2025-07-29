@@ -1,0 +1,34 @@
+.lista-agendamentos table {
+    width: 100%;
+    max-width: 800px;
+    border-collapse: collapse;
+    background-color: #fff;
+    color: #4b1623;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.lista-agendamentos th,
+.lista-agendamentos td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.lista-agendamentos th {
+    background-color: #f0b96b;
+}
+
+.lista-agendamentos td button {
+    margin-right: 6px;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: #c4594b;
+    color: #fff;
+    cursor: pointer;
+}
+
+.lista-agendamentos td button:hover {
+    opacity: 0.9;
+}

@@ -1,0 +1,29 @@
+.agenda-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.bloco-horario {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid #ccc;
+    padding: 8px 0;
+}
+
+.hora {
+    width: 80px;
+    font-weight: bold;
+    color: #4b1623;
+}
+
+.conteudo {
+    flex: 1;
+}
+
+.disponivel {
+    color: #888;
+    font-style: italic;
+}

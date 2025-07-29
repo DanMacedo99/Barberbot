@@ -1,0 +1,24 @@
+.visualizacao-selector {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.visualizacao-selector button {
+    padding: 10px 20px;
+    background-color: #f0b96b;
+    border: none;
+    border-radius: 6px;
+    color: #4b1623;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.visualizacao-selector button.ativo {
+    background-color: #c4594b;
+    color: #fff;
+}
+
+.visualizacao-selector button:hover {
+    opacity: 0.9;
+}

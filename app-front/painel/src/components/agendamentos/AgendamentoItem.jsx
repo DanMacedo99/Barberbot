@@ -1,5 +1,6 @@
 import { useState } from "react";
 import './AgendamentoItem.css';
+import AgendamentoEditor from './AgendamentoEditor';
 
 function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
 
@@ -19,49 +20,16 @@ function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
     <div className="agendamento-item">
       <h3>{item.nome}</h3>
       {editando ? (
-        <div>
-          <input
-            type='text'
-            value={formulario.nome}
-            onChange={(e) =>
-              setFormulario({
-                ...formulario, nome: e.target.value
-              })
-            }
-            placeholder='Nome do cliente'
-          />
-          <input
-            type='text'
-            value={formulario.servico}
-            onChange={(e) =>
-              setFormulario({
-                ...formulario, servico: e.target.value
-              })
-            }
-            placeholder='Serviço'
-          />
-          <input
-            type='time'
-            value={formulario.horario}
-            onChange={(e) =>
-              setFormulario({
-                ...formulario, horario: e.target.value
-              })
-            }
-            placeholder='Horário'
-          />
+        <AgendamentoEditor
+          item={item}
+          onConfirmar={(id, dados) => {
+            onEditar(id, dados);
+            setEditando(false);
+          }}
+          onCancelar={() => setEditando(false)}
+        />
 
-          <button
-            className="confirmar"
-            onClick={salvar}
-          >Salvar</button>
-
-          <button
-            className="cancelar"
-            onClick={() => setEditando(false)}
-          >Cancelar</button>
-
-        </div>) : (
+      ) : (
         <>
           <p>Serviço: {item.servico}</p>
           <p>Horário: {item.horario}</p>
