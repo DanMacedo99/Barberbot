@@ -16,7 +16,7 @@ const DEFAULT_CONFIG = {
     servicos: [
         { nome: 'Corte de Cabelo', duracao: 30, preco: 20 },
         { nome: 'Barba', duracao: 20, preco: 15 },
-        { nome: 'Corte e Barba', duracao: 45, preco: 50 },
+        { nome: 'Corte e Barba', duracao: 45, preco: 30 },
     ],
 };
 

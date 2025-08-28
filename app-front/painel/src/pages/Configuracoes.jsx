@@ -16,11 +16,16 @@ function Configuracoes() {
         alert('Configurações atualizadas!');
     };
 
-    const atualizaHorarioDia = (dia, campo, valor) => {
+    const atualizaHorarioDia = (indexDia, status, novoHorario) => {
         setFuncionamento((prev) => {
+
+            //copia do estado atual garantindo imutabilidade do original
             const novo = { ...prev };
-            if (!novo[dia]) novo[dia] = { abre: '09:00', fecha: '18:00' };
-            novo[dia] = { ...novo[dia], [campo]: valor };
+
+            //se o dia não tiver configuração(null), inicializa com valores padrão
+            if (!novo[indexDia]) novo[indexDia] = { abre: '09:00', fecha: '18:00' };
+
+            novo[indexDia] = { ...novo[indexDia], [status]: novoHorario };
             return novo;
         });
     };
@@ -34,12 +39,12 @@ function Configuracoes() {
     }
 
     const adicionarServico = () => {
-        setServicos((prev) => [...prev, { nome: '', duracao: 30, preco: 0 }]);
+        setServicos((prev) => [...prev, { nome: '', duracao: 30, preco: "" }]);
     }
 
-    const atualizarServico = (index, campo, valor) => {
-        setServicos((prev) => prev.map((servico, idx) => (
-            idx === index ? { ...servico, [campo]: campo === 'duracaoMin' || campo === 'preco' ? Number(valor) : valor } : servico
+    const atualizarServico = (indexServico, campo, novoValor) => {
+        setServicos((prev) => prev.map((servico, i) => (
+            i === indexServico ? { ...servico, [campo]: campo === 'duracao' || campo === 'preco' ? Number(novoValor) : novoValor } : servico
         )))
     };
 
@@ -49,7 +54,7 @@ function Configuracoes() {
 
 
     return (
-        <div className="configuracoes-container"    >
+        <div className="configuracoes-container">
             <div className='configuracoes-texto'>
                 <h2 className='configuracoes-title'>Configurações da barbearia</h2>
 
@@ -121,7 +126,7 @@ function Configuracoes() {
                         >
                             <input
                                 placeholder="Nome do serviço"
-                                value={servico.value}
+                                value=""
                                 onChange={(e) => atualizarServico(index, 'nome', e.target.value)}
                             />
                             <input
@@ -129,7 +134,7 @@ function Configuracoes() {
                                 placeholder="Duração (min)"
                                 min={5}
                                 step={5}
-                                value={servico.duracaoMin}
+                                value=""
                                 onChange={(e) => atualizarServico(index, 'duracaoMin', e.target.value)}
                             />
                             <input
@@ -137,7 +142,7 @@ function Configuracoes() {
                                 placeholder="Preço"
                                 min={0}
                                 step={1}
-                                value={servico.preco}
+                                value=""
                                 onChange={(e) => atualizarServico(index, 'preco', e.target.value)}
                             />
                             <button onClick={() => removerServico(index)}>Remover</button>
