@@ -4,6 +4,8 @@ import AgendamentoEditor from './AgendamentoEditor';
 
 function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
 
+  if (!item) return null;
+
   const [editando, setEditando] = useState(false);
   const [formulario, setFormulario] = useState({
     servico: item.servico,

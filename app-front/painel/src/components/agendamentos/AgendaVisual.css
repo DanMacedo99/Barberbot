@@ -13,17 +13,27 @@
     padding: 8px 0;
 }
 
-.hora {
-    width: 80px;
-    font-weight: bold;
-    color: #4b1623;
+
+.bloco-horario .conteudo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    height: 100%;
+    /* força a altura cheia */
 }
+
+
 
 .conteudo {
     flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .disponivel {
     color: #888;
     font-style: italic;
+    padding-top: 4px;
 }

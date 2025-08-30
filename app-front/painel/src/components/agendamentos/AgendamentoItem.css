@@ -1,10 +1,23 @@
 .agendamento-item {
     background-color: #4b1623;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 20px;
+    padding: 8px 12px;
     color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+
+
+    justify-content: space-between;
+
+    box-sizing: border-box;
+    /* Garante que padding não ultrapasse altura */
+    height: 100%;
+    /* força preencher o espaço dado */
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+    /* evita vazar pra fora */
 }
 
 .agendamento-item h3 {
@@ -26,6 +39,7 @@
 
 .agendamento-item p {
     margin: 4px 0;
+    word-break: break-word;
 }
 
 .agendamento-item .confirmar {
