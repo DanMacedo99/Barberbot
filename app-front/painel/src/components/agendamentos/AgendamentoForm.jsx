@@ -7,7 +7,7 @@ function AgendamentoForm({ onCriar }) {
 
     const hoje = new Date().toISOString().split('T')[0];
     const { config } = useConfig();
-    const servicos = config.servicos || [];
+    const servicos = config?.servicos || [];
     const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
     const [formulario, setFormulario] = useState({
         nome: '',
@@ -47,7 +47,9 @@ function AgendamentoForm({ onCriar }) {
         }
 
         onCriar({
-            ...formulario, status: 'pendente'
+            ...formulario,
+            servicoId: Number(formulario.servico),
+            status: 'pendente'
         });
 
         setFormulario({
@@ -77,8 +79,8 @@ function AgendamentoForm({ onCriar }) {
                 onChange={handleChange}
             >
                 <option value="">Selecione um serviço</option>
-                {servicos.map((servico, index) => (
-                    <option key={index} value={servico.nome}>
+                {servicos.map((servico) => (
+                    <option key={servico.id} value={servico.id}>
                         {servico.nome} - {servico.duracao} min - R$ {servico.preco}
                     </option>
                 ))}

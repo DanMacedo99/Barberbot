@@ -5,11 +5,22 @@ import { useConfig } from '../../context/ConfigContext';
 function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const { config } = useConfig();
 
-    const intervaloMin = config.slotMin;
+    if (!config) {
+        return <div className="agenda-empty-state">Carregando configuração...</div>;
+    }
+
+
     const dataHoje = new Date();
     const diaSemana = dataHoje.getDay()
-    const horaAberto = config.funcionamento[diaSemana].horaAbertura;
-    const horaFechado = config.funcionamento[diaSemana].horaFechamento;
+
+    const funcionamentoDia = config.funcionamento[diaSemana];
+    if (!funcionamentoDia || !funcionamentoDia.aberto) {
+        return <div className="agenda-empty-state">Estabelecimento fechado hoje.</div>;
+    }
+
+    const intervaloMin = config.slotMin;
+    const horaAberto = funcionamentoDia.horaAbertura;
+    const horaFechado = funcionamentoDia.horaFechamento;
 
     function gerarHorarios(inicio, fim, intervaloMin) {
         const horariosGerados = [];
@@ -44,16 +55,21 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
 
                 if (!agendamento) {
                     return (
-                        <div className='' key={horarioAtual}>
-                            <div className=''>{horarioAtual}</div>
-                            <div className=''>
+                        <div className='bloco-horario livre' key={horarioAtual}>
+                            <div className='hora'>{horarioAtual}</div>
+                            <div className='conteudo'>
                                 <span className='disponivel'>Disponível</span>
                             </div>
                         </div>
                     );
                 }
 
-                const servicoConfig = config.servicos.find(s => s.nome === agendamento?.servico);
+                const servicoConfig = config.servicos.find(s => {
+                    if (typeof agendamento.servico === 'string') {
+                        return s.nome === agendamento.servico;
+                    }
+                    return s.id === agendamento.servico;
+                });
                 const duracaoServico = servicoConfig?.duracao || intervaloMin;
                 const blocosNecessarios = Math.ceil(duracaoServico / intervaloMin);
 

@@ -34,16 +34,20 @@ function ListaAgendamentos({ agendamentos, onEditar, onCancelar, onConfirmar }) 
                                 </td>
                             ) : (
                                 <>
-                                    <td>{item.horario}</td>
-                                    <td>{item.nome}</td>
+                                    <td className="lista-horario">{item.horario}</td>
+                                    <td className="lista-cliente">{item.nome}</td>
                                     <td>{item.servico}</td>
-                                    <td>{item.status}</td>
                                     <td>
-                                        <button onClick={() => setEditandoId(item.id)}>Editar</button>
-                                        <button onClick={() => onCancelar(item.id)}>Cancelar</button>
+                                        <span className={`status-badge status-${item.status?.toLowerCase()}`}>
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                    <td className="lista-acoes">
+                                        <button className="acao-editar" onClick={() => setEditandoId(item.id)}>Editar</button>
+                                        <button className="acao-cancelar" onClick={() => onCancelar(item.id)}>Cancelar</button>
 
                                         {item.status === 'pendente' && (
-                                            <button onClick={() => onConfirmar(item.id)}>Confirmar</button>
+                                            <button className="acao-confirmar" onClick={() => onConfirmar(item.id)}>Confirmar</button>
                                         )}
                                     </td>
                                 </>

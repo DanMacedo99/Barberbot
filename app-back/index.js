@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -8,6 +9,7 @@ const app = express();
 const PORT = 3000;
 
 
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -15,6 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 
 const agendamentoRoutes = require('./routes/agendamentos');
 app.use('/', agendamentoRoutes)
+
+const configRoutes = require('./routes/config');
+app.use('/', configRoutes);
+
 
 const whatsappWebhook = require('./routes/whatsappWebhook');
 app.use('/', whatsappWebhook);

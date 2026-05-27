@@ -1,10 +1,13 @@
 const agendamentos = require('../data/agendamentos');
+
 const { enviarMensagemWhatsapp } = require('../utils/twilioClient')
 
 
 
 function listarAgendamento(req, res) {
     res.json(agendamentos);
+
+    console.log('Lista de agendamentos,', agendamentos);
 }
 
 function criarAgendamento(req, res) {
