@@ -29,7 +29,7 @@ function Home() {
 
             <section className="crm-hero">
                 <div>
-                    <span className="crm-eyebrow">CRM de agendamentos</span>
+
                     <h1 className="app-title">Painel do Barbeiro</h1>
                     <p className="crm-subtitle">Acompanhe clientes, horarios e status do dia em um painel simples.</p>
                 </div>
@@ -59,7 +59,7 @@ function Home() {
                     <div className="crm-panel-header">
                         <div>
                             <span className="crm-section-label">Operacao</span>
-                            <h2>Agenda de clientes</h2>
+                            <h2>Agenda</h2>
                         </div>
                         <VisualizacaoSelector modoAtual={modo} aoMudarModo={setModo} />
                     </div>

@@ -63,7 +63,7 @@ function Configuracoes() {
 
                     <section className="configuracoes-hero">
                         <div>
-                            <span className="configuracoes-eyebrow">Preferências do CRM</span>
+
                             <h2 className='configuracoes-title'>Configurações da barbearia</h2>
                             <p>Controle horários, serviços e o intervalo mínimo usado nos agendamentos.</p>
                         </div>

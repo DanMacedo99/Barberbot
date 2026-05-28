@@ -1,3 +1,6 @@
+# Ignore node_modules and environment files for both backend and frontend
+node_modules/
+
 # Backend
 /app-back/node_modules
 /app-back/.env

@@ -1,0 +1,25 @@
+{
+  "name": "barberbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"cd app-back && nodemon\" \"cd app-front/painel && npm run dev\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanMacedo99/Barberbot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DanMacedo99/Barberbot/issues"
+  },
+  "homepage": "https://github.com/DanMacedo99/Barberbot#readme",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14"
+  }
+}
