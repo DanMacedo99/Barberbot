@@ -1,39 +1,98 @@
 const agendamentos = require('../data/agendamentos');
+const config = require('../data/config');
 
 const { enviarMensagemWhatsapp } = require('../utils/twilioClient')
 
+function criarDataHora(data, horario) {
+    return new Date(`${data}T${horario}`);
+}
 
+function calcularFimAgendamento(data, horario, duracao) {
+    const inicio = criarDataHora(data, horario);
+    return new Date(inicio.getTime() + duracao * 60000); // 60000 milissegundos em um minuto
+}
+
+function verificarConflito(inicioAgendamentoNovo, fimAgendamentoNovo, inicioAgendamentoExistente, fimAgendamentoExistente) {
+    return (
+        (inicioAgendamentoNovo < fimAgendamentoExistente && fimAgendamentoNovo > inicioAgendamentoExistente)
+    );
+}
+
+function existeConflito(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento) {
+
+    const inicioAgendamentoNovo = criarDataHora(dataNovoAgendamento, horarioNovoAgendamento);
+    const fimAgendamentoNovo = calcularFimAgendamento(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento);
+
+    const agendamentosNoMesmoDia = agendamentos.filter(agendamentoExistente => agendamentoExistente.data === dataNovoAgendamento);
+
+    for (const agendamentoExistente of agendamentosNoMesmoDia) {
+        const servicoAgendamentoExistente = config.servicos.find(
+            (servico) => servico.id === Number(agendamentoExistente.servicoId)
+        );
+        if (!servicoAgendamentoExistente) {
+            continue;
+        }
+    }
+
+}
 
 function listarAgendamento(req, res) {
-    res.json(agendamentos);
+
+    const agendamentosFormatados = agendamentos.map((agendamento) => {
+        const servicoEncontrado = config.servicos.find(
+            (servico) => servico.id === Number(agendamento.servicoId)
+        );
+
+        return {
+            ...agendamento,
+            servico: servicoEncontrado ? servicoEncontrado.nome : 'Serviço não encontrado'
+        };
+    });
+
+    res.json(agendamentosFormatados);
 
     console.log('Lista de agendamentos,', agendamentos);
 }
 
 function criarAgendamento(req, res) {
-    const { nome, servico, horario } = req.body;
+    const { nome, servicoId, data, horario } = req.body;
 
-    if (!nome || !servico || !horario) {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    if (!nome || !servicoId || !data || !horario) {
+        return res.status(400).json({ error: 'Preencha todos os campos, nome, serviço, data e horário são necessários.' });
+
+    }
+
+    const servicoEncontrado = config.servicos.find(
+        (servico) => servico.id === Number(servicoId)
+    );
+
+    if (!servicoEncontrado) {
+        return res.status(400).json({ error: 'Serviço inválido.' });
     }
 
     const novoAgendamento = {
         id: Date.now().toString(),
         nome,
-        servico,
+        data,
         horario,
+        servicoId: Number(servicoId),
         status: 'pendente'
     };
 
     agendamentos.push(novoAgendamento);
 
+    const agendamentoFormatado = {
+        ...novoAgendamento,
+        servico: servicoEncontrado.nome
+    };
+
 
     const io = require('../utils/socket').getIO();
-    io.emit('agendamento-criado', novoAgendamento);// Emitindo o evento de novo agendamento para todos os clientes conect
+    io.emit('agendamento-criado', agendamentoFormatado);// Emitindo o evento de novo agendamento para todos os clientes conect
 
     res.status(201).json({
         message: 'Agendamento criado com sucesso',
-        agendamento: novoAgendamento
+        agendamento: agendamentoFormatado
     });
 }
 

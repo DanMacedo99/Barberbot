@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"cd app-back && nodemon\" \"cd app-front/painel && npm run dev\""
+    "dev": "concurrently -n BACK,FRONT,NGROK -c green,blue,magenta \"cd app-back && nodemon\" \"cd app-front/painel && npm run dev\" \"cd app-back && echo Iniciando ngrok... && npx ngrok http 3000\""
   },
   "repository": {
     "type": "git",
