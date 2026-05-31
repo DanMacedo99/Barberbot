@@ -1,13 +1,13 @@
 module.exports = {
     slotMin: 15, // intervalo padrão em minutos
     funcionamento: {
-        1: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
+        1: { aberto: true, horaAbertura: '00:00', horaFechamento: '4:00' },
         2: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         3: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
-        4: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
+        4: null,
         5: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         6: { aberto: true, horaAbertura: '09:00', horaFechamento: '18:00' },
-        0: { aberto: true, horaAbertura: '09:00', horaFechamento: '18:00' } // domingo fechado
+        0: { aberto: true, horaAbertura: '13:00', horaFechamento: '23:00' } // domingo fechado
     },
     servicos: [
         { id: 1, nome: 'Corte de Cabelo', duracao: 30, preco: 20 },

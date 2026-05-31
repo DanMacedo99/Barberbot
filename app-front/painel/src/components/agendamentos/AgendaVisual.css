@@ -1,8 +1,25 @@
 .agenda-visual {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+}
+
+.agenda-corpo {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 100%;
+}
+
+.linha-horario-atual {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: red;
+    z-index: 10;
 }
 
 .bloco-horario {
