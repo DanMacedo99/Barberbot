@@ -32,6 +32,28 @@ function existeConflito(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovo
         if (!servicoAgendamentoExistente) {
             continue;
         }
+
+        const inicioAgendamentoExistente = criarDataHora(
+            agendamentoExistente.data,
+            agendamentoExistente.horario
+        );
+
+        const fimAgendamentoExistente = calcularFimAgendamento(
+            agendamentoExistente.data,
+            agendamentoExistente.horario,
+            servicoAgendamentoExistente.duracao
+        );
+
+        const existeConflito = verificarConflito(
+            inicioAgendamentoNovo,
+            fimAgendamentoNovo,
+            inicioAgendamentoExistente,
+            fimAgendamentoExistente
+        );
+
+        if (existeConflito) {
+            return true;
+        }
     }
 
 }
@@ -68,6 +90,16 @@ function criarAgendamento(req, res) {
 
     if (!servicoEncontrado) {
         return res.status(400).json({ error: 'Serviço inválido.' });
+    }
+
+
+    const conflito = existeConflito(data, horario, servicoEncontrado.duracao);
+
+    if (conflito) {
+        return res.status(409).json({
+            error: 'Já existe um agendamento neste horário.',
+            message: 'Por favor, escolha outro horário ou data para o seu agendamento.'
+        });
     }
 
     const novoAgendamento = {

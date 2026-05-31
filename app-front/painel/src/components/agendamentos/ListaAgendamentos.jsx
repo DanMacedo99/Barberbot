@@ -6,6 +6,16 @@ import AgendamentoEditor from './AgendamentoEditor';
 function ListaAgendamentos({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const [editandoId, setEditandoId] = useState(null);
 
+    function obterDataHoraDoAgendamento(agendamento) {
+        return new Date(`${agendamento.data}T${agendamento.horario}:00`);
+    }
+
+    const agendamentosOrdenados = [...agendamentos].sort((a, b) => {
+        const dataHoraA = obterDataHoraDoAgendamento(a);
+        const dataHoraB = obterDataHoraDoAgendamento(b);
+        return dataHoraA - dataHoraB;
+    })
+
     return (
         <div className="lista-agendamentos">
             <table>
@@ -19,7 +29,7 @@ function ListaAgendamentos({ agendamentos, onEditar, onCancelar, onConfirmar }) 
                     </tr>
                 </thead>
                 <tbody>
-                    {agendamentos.map((item) => (
+                    {agendamentosOrdenados.map((item) => (
                         <tr key={item.id}>
                             {editandoId === item.id ? (
                                 <td colSpan="5">

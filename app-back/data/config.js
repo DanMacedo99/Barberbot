@@ -7,7 +7,7 @@ module.exports = {
         4: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         5: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         6: { aberto: true, horaAbertura: '09:00', horaFechamento: '18:00' },
-        0: null // domingo fechado
+        0: { aberto: true, horaAbertura: '09:00', horaFechamento: '18:00' } // domingo fechado
     },
     servicos: [
         { id: 1, nome: 'Corte de Cabelo', duracao: 30, preco: 20 },
