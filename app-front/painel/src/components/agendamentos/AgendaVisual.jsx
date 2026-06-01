@@ -1,15 +1,17 @@
 import './AgendaVisual.css';
 import AgendamentoItem from './AgendamentoItem';
+import AgendaDiaHeader from './AgendaDiaHeader';
+import LinhaHorarioAtual from './LinhaHorarioAtual';
 import { useConfig } from '../../context/ConfigContext';
 import { useState, useEffect } from 'react';
+import {
+    formatarDataLocal,
+    gerarHorarios,
+    calcularPosicaoLinhaHorarioAtual,
+    encontrarServicoDoAgendamento,
+    calcularBlocosNecessarios
+} from '../../utils/agendaUtils';
 
-function formatarDataLocal(data) {
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-
-    return `${dia}-${mes}-${ano}`;
-}
 
 function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const { config } = useConfig();
@@ -51,68 +53,34 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const horaAberto = funcionamentoDia?.horaAbertura;
     const horaFechado = funcionamentoDia?.horaFechamento;
 
-    console.log('Dia da semana:', diaSemana);
-    console.log('Funcionamento do dia:', funcionamentoDia);
-    console.log('Hora aberto:', horaAberto);
-    console.log('Hora fechado:', horaFechado);
 
-    function gerarHorarios(inicio, fim, intervaloMin) {
-        const horariosGerados = [];
-        let [horaAtual, minutoAtual] = inicio.split(':').map(Number);
-        const [horaFinal, minutoFinal] = fim.split(':').map(Number);
-
-        while (horaAtual < horaFinal || (horaAtual === horaFinal && minutoAtual <= minutoFinal)) {
-
-            const horaFormatada = `${String(horaAtual).padStart(2, '0')}:${String(minutoAtual).padStart(2, '0')}`;
-            horariosGerados.push(horaFormatada);
-
-            minutoAtual += intervaloMin;
-            if (minutoAtual >= 60) {
-                minutoAtual -= 60;
-                horaAtual += 1;
-            }
-        }
-        return horariosGerados;
-    }
-
-    function converterHorarioParaMinutos(horario) {
-        const [hora, minuto] = horario.split(':').map(Number);
-        return hora * 60 + minuto;
-    }
 
     const horarios = estabelecimentoFechado ? [] : gerarHorarios(horaAberto, horaFechado, intervaloMin);
     const horariosOcupados = new Set();
 
     let posicaoLinhaHorarioAtual = null;
+
+
     if (exibindoHoje && !estabelecimentoFechado) {
-        const agora = horarioAtual;
-        const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
-
-        const minutosAbertura = converterHorarioParaMinutos(horaAberto);
-        const minutosDesdeAbertura = minutosAgora - minutosAbertura;
-        const alturaBloco = 66; // altura de cada bloco de horário em pixels
-        const pixelsPorMinuto = alturaBloco / intervaloMin;
-        posicaoLinhaHorarioAtual = minutosDesdeAbertura * pixelsPorMinuto;
-
+        posicaoLinhaHorarioAtual = calcularPosicaoLinhaHorarioAtual({
+            horarioAtual,
+            horarioAbertura: horaAberto,
+            intervaloMin,
+            alturaBloco: 66
+        });
     }
 
     return (
         <div className="agenda-visual">
-            <div className="agenda-header">
-                <button onClick={() => handleChangeDay(-1)}>←</button>
-
-                <button onClick={handleChangeToToday}>Hoje</button>
-
-                <button onClick={() => handleChangeDay(1)}>→</button>
-
-                <strong>{dataSelecionadaFormatada}</strong>
-            </div>
+            <AgendaDiaHeader
+                dataSelecionadaFormatada={dataSelecionadaFormatada}
+                onDiaAnterior={() => handleChangeDay(-1)}
+                onProximoDia={() => handleChangeDay(1)}
+                onHoje={handleChangeToToday}
+            />
             <div className="agenda-corpo">
                 {posicaoLinhaHorarioAtual !== null && (
-                    <div
-                        className="linha-horario-atual"
-                        style={{ top: `${posicaoLinhaHorarioAtual}px` }}
-                    />
+                    <LinhaHorarioAtual posicao={posicaoLinhaHorarioAtual} />
                 )}
 
                 {estabelecimentoFechado ? (
@@ -141,14 +109,8 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
                             );
                         }
 
-                        const servicoConfig = config.servicos.find(s => {
-                            if (typeof agendamento.servico === 'string') {
-                                return s.nome === agendamento.servico;
-                            }
-                            return s.id === agendamento.servico;
-                        });
-                        const duracaoServico = servicoConfig?.duracao || intervaloMin;
-                        const blocosNecessarios = Math.ceil(duracaoServico / intervaloMin);
+                        const servicoConfig = encontrarServicoDoAgendamento(agendamento, config.servicos);
+                        const blocosNecessarios = calcularBlocosNecessarios(servicoConfig, intervaloMin);
 
                         const indexInicial = horarios.indexOf(horarioAtual);
                         for (let i = 0; i < blocosNecessarios; i++) {

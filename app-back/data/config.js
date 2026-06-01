@@ -1,7 +1,7 @@
 module.exports = {
     slotMin: 15, // intervalo padrão em minutos
     funcionamento: {
-        1: { aberto: true, horaAbertura: '00:00', horaFechamento: '4:00' },
+        1: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         2: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         3: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         4: null,

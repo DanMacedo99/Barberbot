@@ -1,69 +1,18 @@
-const agendamentos = require('../data/agendamentos');
+
 const config = require('../data/config');
-
+const agendamentos = require('../data/agendamentos');
 const { enviarMensagemWhatsapp } = require('../utils/twilioClient')
+const {
+    buscarServicoPorId,
+    criarNovoAgendamento
+} = require('../services/agendamentoService')
 
-function criarDataHora(data, horario) {
-    return new Date(`${data}T${horario}`);
-}
 
-function calcularFimAgendamento(data, horario, duracao) {
-    const inicio = criarDataHora(data, horario);
-    return new Date(inicio.getTime() + duracao * 60000); // 60000 milissegundos em um minuto
-}
-
-function verificarConflito(inicioAgendamentoNovo, fimAgendamentoNovo, inicioAgendamentoExistente, fimAgendamentoExistente) {
-    return (
-        (inicioAgendamentoNovo < fimAgendamentoExistente && fimAgendamentoNovo > inicioAgendamentoExistente)
-    );
-}
-
-function existeConflito(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento) {
-
-    const inicioAgendamentoNovo = criarDataHora(dataNovoAgendamento, horarioNovoAgendamento);
-    const fimAgendamentoNovo = calcularFimAgendamento(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento);
-
-    const agendamentosNoMesmoDia = agendamentos.filter(agendamentoExistente => agendamentoExistente.data === dataNovoAgendamento);
-
-    for (const agendamentoExistente of agendamentosNoMesmoDia) {
-        const servicoAgendamentoExistente = config.servicos.find(
-            (servico) => servico.id === Number(agendamentoExistente.servicoId)
-        );
-        if (!servicoAgendamentoExistente) {
-            continue;
-        }
-
-        const inicioAgendamentoExistente = criarDataHora(
-            agendamentoExistente.data,
-            agendamentoExistente.horario
-        );
-
-        const fimAgendamentoExistente = calcularFimAgendamento(
-            agendamentoExistente.data,
-            agendamentoExistente.horario,
-            servicoAgendamentoExistente.duracao
-        );
-
-        const existeConflito = verificarConflito(
-            inicioAgendamentoNovo,
-            fimAgendamentoNovo,
-            inicioAgendamentoExistente,
-            fimAgendamentoExistente
-        );
-
-        if (existeConflito) {
-            return true;
-        }
-    }
-
-}
 
 function listarAgendamento(req, res) {
 
     const agendamentosFormatados = agendamentos.map((agendamento) => {
-        const servicoEncontrado = config.servicos.find(
-            (servico) => servico.id === Number(agendamento.servicoId)
-        );
+        const servicoEncontrado = buscarServicoPorId(agendamento.servicoId);
 
         return {
             ...agendamento,
@@ -77,54 +26,19 @@ function listarAgendamento(req, res) {
 }
 
 function criarAgendamento(req, res) {
-    const { nome, servicoId, data, horario } = req.body;
+    const resultado = criarNovoAgendamento(req.body);
 
-    if (!nome || !servicoId || !data || !horario) {
-        return res.status(400).json({ error: 'Preencha todos os campos, nome, serviço, data e horário são necessários.' });
 
+    if (resultado.erro) {
+        return res.status(resultado.status).json(resultado.resposta);
     }
-
-    const servicoEncontrado = config.servicos.find(
-        (servico) => servico.id === Number(servicoId)
-    );
-
-    if (!servicoEncontrado) {
-        return res.status(400).json({ error: 'Serviço inválido.' });
-    }
-
-
-    const conflito = existeConflito(data, horario, servicoEncontrado.duracao);
-
-    if (conflito) {
-        return res.status(409).json({
-            error: 'Já existe um agendamento neste horário.',
-            message: 'Por favor, escolha outro horário ou data para o seu agendamento.'
-        });
-    }
-
-    const novoAgendamento = {
-        id: Date.now().toString(),
-        nome,
-        data,
-        horario,
-        servicoId: Number(servicoId),
-        status: 'pendente'
-    };
-
-    agendamentos.push(novoAgendamento);
-
-    const agendamentoFormatado = {
-        ...novoAgendamento,
-        servico: servicoEncontrado.nome
-    };
-
 
     const io = require('../utils/socket').getIO();
-    io.emit('agendamento-criado', agendamentoFormatado);// Emitindo o evento de novo agendamento para todos os clientes conect
+    io.emit('agendamento-criado', resultado.agendamento);// Emitindo o evento de novo agendamento para todos os clientes conect
 
     res.status(201).json({
         message: 'Agendamento criado com sucesso',
-        agendamento: agendamentoFormatado
+        agendamento: resultado.agendamento
     });
 }
 

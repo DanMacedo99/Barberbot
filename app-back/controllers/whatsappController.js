@@ -1,9 +1,13 @@
 const twilio = require('twilio');
 const mensagens = require('../data/mensagens');
 const fluxoAgendamentos = require('../data/fluxoAgendamento');
-const agendamentos = require('../data/agendamentos');
 const { interpretarMensagem } = require("../utils/openaiClient")
 const { getIO } = require('../utils/socket');
+const {
+    buscarServicoPorNome,
+    criarNovoAgendamento
+} = require('../services/agendamentoService')
+
 
 
 
@@ -62,27 +66,36 @@ async function receberMensagemWhatsapp(req, res) {
         fluxo.servico && fluxo.servico !== "null" && fluxo.servico.trim() !== "" &&
         fluxo.data && fluxo.data !== "null" && fluxo.data.trim() !== "" &&
         fluxo.hora && fluxo.hora !== "null" && fluxo.hora.trim() !== ""
-
     ) {
+        const servicoEncontrado = buscarServicoPorNome(fluxo.servico);
+        if (!servicoEncontrado) {
+            twiml.message(`Desculpa, não encontrei o serviço ${fluxo.servico}. Pode escolher um serviço disponível?`);
+        } else {
+            const resultado = criarNovoAgendamento({
+                nome: nomePerfil,
+                servicoId: servicoEncontrado.id,
+                data: fluxo.data,
+                horario: fluxo.hora,
+                numero,
+                origem: 'whatsapp'
+            });
 
-        const agendamento = {
-            id: Date.now().toString(),
-            numero,
-            nome: nomePerfil || numero,
-            servico: fluxo.servico,
-            horario: `${fluxo.data} às ${fluxo.hora}`,
-            status: 'pendente',
-            dataHoraCriacao: new Date().toISOString()
-        };
+            if (resultado.erro) {
+                twiml.message(resultado.resposta?.message || resultado.resposta?.error || 'Desculpa, ocorreu um erro ao criar seu agendamento. consegue descrever melhor, dia, horário e serviço?');
+            } else {
+                const io = getIO();
+                io.emit('agendamento-criado', resultado.agendamento);
 
-        agendamentos.push(agendamento);
-
-        const io = getIO();
-        io.emit('agendamento-criado', agendamento); // Emitindo o evento de novo agendamento para todos os clientes conectados
-
-        delete fluxoAgendamentos[numero];
-
-        twiml.message(`Fechado, ${agendamento.nome}! Certo recebemos o seu pedido de agendamento:\n\n Serviço: ${agendamento.servico}\n Data e hora: ${agendamento.horario}\n\nVamos confirmar e entramos em contato!`);
+                delete fluxoAgendamentos[numero];
+                twiml.message(
+                    `Fechado, ${resultado.agendamento.nome}! Recebemos o seu pedido de agendamento:\n\n` +
+                    `Serviço: ${resultado.agendamento.servico}\n` +
+                    `Data: ${resultado.agendamento.data}\n` +
+                    `Horário: ${resultado.agendamento.horario}\n\n` +
+                    `Vamos confirmar e entramos em contato!`
+                );
+            }
+        }
     } else {
         if (!fluxo.servico) {
             twiml.message("fala ai Beleza? Qual serviço você quer agendar?");
@@ -97,9 +110,8 @@ async function receberMensagemWhatsapp(req, res) {
         }
     }
 
-    res.writeHead(200, { 'content-Type': 'text/xml' })
+    res.writeHead(200, { 'content-Type': 'text/xml' });
     res.end(twiml.toString());
-
 }
 
 module.exports = {
