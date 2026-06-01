@@ -1,3 +1,5 @@
+@import './AgendaDiaHeader.css';
+
 .agenda-visual {
     position: relative;
     display: flex;
