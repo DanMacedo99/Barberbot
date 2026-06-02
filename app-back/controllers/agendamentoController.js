@@ -79,7 +79,7 @@ async function atualizarAgendamento(req, res) {
         mensagemCliente = mensagemAlteracaoHorario(agendamentoAntigo, agendamentoNovo);
     }
 
-    if (mensagemCliente) {
+    if (mensagemCliente && agendamentoNovo.numero) {
         try {
             await enviarMensagemWhatsapp(
                 agendamentoNovo.numero,
