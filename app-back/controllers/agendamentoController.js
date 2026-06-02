@@ -1,11 +1,14 @@
-
-const config = require('../data/config');
 const agendamentos = require('../data/agendamentos');
 const { enviarMensagemWhatsapp } = require('../utils/twilioClient')
 const {
     buscarServicoPorId,
     criarNovoAgendamento
 } = require('../services/agendamentoService')
+const {
+    mensagemConfirmacaoAgendamento,
+    mensagemAlteracaoHorario,
+    mensagemCancelamentoAgendamento
+} = require('../services/whatsappService');
 
 
 
@@ -34,7 +37,7 @@ function criarAgendamento(req, res) {
     }
 
     const io = require('../utils/socket').getIO();
-    io.emit('agendamento-criado', resultado.agendamento);// Emitindo o evento de novo agendamento para todos os clientes conect
+    io.emit('agendamento-criado', resultado.agendamento);
 
     res.status(201).json({
         message: 'Agendamento criado com sucesso',
@@ -70,10 +73,10 @@ async function atualizarAgendamento(req, res) {
         agendamentoAntigo.status !== agendamentoNovo.status &&
         agendamentoNovo.status === 'confirmado'
     ) {
-        mensagemCliente = `Olá, ${agendamentoNovo.nome}! Seu agendamento foi confirmado \n\nServiço: ${agendamentoNovo.servico}\nHorário: ${agendamentoNovo.horario}\n\nObrigado!`
+        mensagemCliente = mensagemConfirmacaoAgendamento(agendamentoNovo);
 
     } else if (agendamentoAntigo.horario !== agendamentoNovo.horario) {
-        mensagemCliente = `Olá ${agendamentos[index].nome}. O horario do seu agendamento foi alterado \n\n de: ${agendamentoAntigo.horario} para: ${agendamentoNovo.horario}\n\nObrigado!`
+        mensagemCliente = mensagemAlteracaoHorario(agendamentoAntigo, agendamentoNovo);
     }
 
     if (mensagemCliente) {
@@ -105,15 +108,16 @@ async function deletarAgendamento(req, res) {
     const agendamento = agendamentos[index];
     const numero = agendamento.numero;
 
-    mensagemCliente = `Olá ${agendamento.nome}, Seu agendamento foi cancelado. \nSe precisar, estamos à deisposição para remarcar.`
+    const mensagemCliente = mensagemCancelamentoAgendamento(agendamento);
 
-    try {
-        await enviarMensagemWhatsapp(numero, mensagemCliente);
-        console.log(`mensagem enviada para ${numero}`);
-    } catch (error) {
-        console.error(`Error ao enviar mensagem pelo WhatsApp:`, error.message);
+    if (numero) {
+        try {
+            await enviarMensagemWhatsapp(numero, mensagemCliente);
+            console.log(`mensagem enviada para ${numero}`);
+        } catch (error) {
+            console.error(`Error ao enviar mensagem pelo WhatsApp:`, error.message);
+        }
     }
-
     const deletado = agendamentos.splice(index, 1);
     res.json({ mensagem: 'Agendamento excluído com sucesso.', deletado });
 
