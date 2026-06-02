@@ -95,6 +95,16 @@ function criarNovoAgendamento({ nome, servicoId, data, horario, numero = null, o
         }
     }
 
+    if (!HorarioDentroDoFuncionamento(data, horario, servicoEncontrado.duracao)) {
+        return {
+            erro: true,
+            status: 400,
+            resposta: { error: 'Horário fora do horário de funcionamento.' }
+        }
+    }
+
+
+
 
     const conflito = existeConflito(data, horario, servicoEncontrado.duracao);
 
@@ -135,6 +145,26 @@ function criarNovoAgendamento({ nome, servicoId, data, horario, numero = null, o
 
 function buscarServicoPorNome(nomeServico) {
     return config.servicos.find((servico) => { return servico.nome.toLowerCase() === nomeServico.toLowerCase() });
+}
+
+function HorarioDentroDoFuncionamento(data, horario, duracaoServico) {
+    const dataAgendamento = new Date(`${data}T00:00`);
+    const diaSemana = dataAgendamento.getDay();
+
+    const funcionamentoDia = config.funcionamento[diaSemana];
+
+    if (!funcionamentoDia || !funcionamentoDia.aberto) {
+        return false;
+    }
+
+    const inicioAgendamento = criarDataHora(data, horario);
+    const fimAgendamento = calcularFimAgendamento(data, horario, duracaoServico);
+
+    const inicioFuncionamento = criarDataHora(data, funcionamentoDia.horaAbertura);
+    const fimFuncionamento = criarDataHora(data, funcionamentoDia.horaFechamento);
+
+    return inicioAgendamento >= inicioFuncionamento && fimAgendamento <= fimFuncionamento;
+
 }
 
 module.exports = {
