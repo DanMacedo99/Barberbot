@@ -95,7 +95,7 @@ function criarNovoAgendamento({ nome, servicoId, data, horario, numero = null, o
         }
     }
 
-    if (!HorarioDentroDoFuncionamento(data, horario, servicoEncontrado.duracao)) {
+    if (!horarioDentroDoFuncionamento(data, horario, servicoEncontrado.duracao)) {
         return {
             erro: true,
             status: 400,
@@ -122,7 +122,7 @@ function criarNovoAgendamento({ nome, servicoId, data, horario, numero = null, o
     const novoAgendamento = {
         id: Date.now().toString(),
         nome,
-        servicoId,
+        servicoId: Number(servicoId),
         data,
         horario,
         status: 'pendente',
@@ -147,7 +147,7 @@ function buscarServicoPorNome(nomeServico) {
     return config.servicos.find((servico) => { return servico.nome.toLowerCase() === nomeServico.toLowerCase() });
 }
 
-function HorarioDentroDoFuncionamento(data, horario, duracaoServico) {
+function horarioDentroDoFuncionamento(data, horario, duracaoServico) {
     const dataAgendamento = new Date(`${data}T00:00`);
     const diaSemana = dataAgendamento.getDay();
 
@@ -167,10 +167,76 @@ function HorarioDentroDoFuncionamento(data, horario, duracaoServico) {
 
 }
 
+function listarAgendamentosFormatados() {
+    return agendamentos.map((agendamento) => {
+        const servicoEncontrado = buscarServicoPorId(agendamento.servicoId);
+        return {
+            ...agendamento,
+            servico: servicoEncontrado ? servicoEncontrado.nome : 'Serviço não encontrado'
+        };
+    });
+
+}
+
+function atualizarAgendamentoPorId(id, novosDados) {
+    const index = agendamentos.findIndex((agendamento) => {
+        return agendamento.id === id;
+    });
+
+    if (index === -1) {
+        return { erro: true, status: 404, resposta: { error: 'Agendamento não encontrado.' } };
+    }
+
+    const agendamentoAntigo = { ...agendamentos[index] };
+
+
+    agendamentos[index] = {
+        ...agendamentos[index],
+        nome: novosDados.nome || agendamentos[index].nome,
+        servicoId: novosDados.servicoId || agendamentos[index].servicoId,
+        data: novosDados.data || agendamentos[index].data,
+        horario: novosDados.horario || agendamentos[index].horario,
+        status: novosDados.status || agendamentos[index].status
+    };
+
+    const servicoEncontrado = buscarServicoPorId(agendamentos[index].servicoId);
+
+    const agendamentoNovo = {
+        ...agendamentos[index],
+        servico: servicoEncontrado ? servicoEncontrado.nome : 'Serviço não encontrado'
+    };
+
+    return { erro: false, agendamentoAntigo, agendamentoNovo };
+}
+
+
+function deletarAgendamentoPorId(id) {
+    const index = agendamentos.findIndex((agendamento) => {
+        return agendamento.id === id;
+    });
+
+    if (index === -1) {
+        return { erro: true, status: 404, resposta: { error: 'Agendamento não encontrado.' } };
+    }
+
+    const agendamentoRemovido = agendamentos[index];
+    agendamentos.splice(index, 1);
+
+    const servicoEncontrado = buscarServicoPorId(agendamentoRemovido.servicoId);
+
+    const agendamentoFormatado = {
+        ...agendamentoRemovido,
+        servico: servicoEncontrado ? servicoEncontrado.nome : 'Serviço não encontrado'
+    };
+
+    return { erro: false, agendamento: agendamentoFormatado };
+}
+
 module.exports = {
-    existeConflito,
-    buscarServicoPorId,
     buscarServicoPorNome,
-    criarNovoAgendamento
+    criarNovoAgendamento,
+    listarAgendamentosFormatados,
+    atualizarAgendamentoPorId,
+    deletarAgendamentoPorId
 };
 

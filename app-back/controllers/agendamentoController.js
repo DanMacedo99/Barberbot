@@ -1,8 +1,10 @@
-const agendamentos = require('../data/agendamentos');
+
 const { enviarMensagemWhatsapp } = require('../utils/twilioClient')
 const {
-    buscarServicoPorId,
-    criarNovoAgendamento
+    listarAgendamentosFormatados,
+    criarNovoAgendamento,
+    atualizarAgendamentoPorId,
+    deletarAgendamentoPorId,
 } = require('../services/agendamentoService')
 const {
     mensagemConfirmacaoAgendamento,
@@ -11,21 +13,12 @@ const {
 } = require('../services/whatsappService');
 
 
-
 function listarAgendamento(req, res) {
 
-    const agendamentosFormatados = agendamentos.map((agendamento) => {
-        const servicoEncontrado = buscarServicoPorId(agendamento.servicoId);
-
-        return {
-            ...agendamento,
-            servico: servicoEncontrado ? servicoEncontrado.nome : 'Serviço não encontrado'
-        };
-    });
+    const agendamentosFormatados = listarAgendamentosFormatados();
 
     res.json(agendamentosFormatados);
 
-    console.log('Lista de agendamentos,', agendamentos);
 }
 
 function criarAgendamento(req, res) {
@@ -47,27 +40,18 @@ function criarAgendamento(req, res) {
 
 async function atualizarAgendamento(req, res) {
     const id = req.params.id;
-    const { nome, servico, horario, status } = req.body;
-    const index = agendamentos.findIndex(a => a.id === id);
+    const resultado = atualizarAgendamentoPorId(id, req.body);
 
-    if (index === -1) {
-        return res.status(404).json({ error: 'Agendamento não encontrado.' });
-    };
+    if (resultado.erro) {
+        return res.status(resultado.status).json(resultado.resposta);
+    }
 
-    const agendamentoAntigo = { ...agendamentos[index] }
+    const agendamentoAntigo = resultado.agendamentoAntigo;
+    const agendamentoNovo = resultado.agendamentoNovo;
 
-    agendamentos[index] = {
-        ...agendamentos[index],
-        nome: nome || agendamentos[index].nome,
-        servico: servico || agendamentos[index].servico,
-        horario: horario || agendamentos[index].horario,
-        status: status || agendamentos[index].status
-    };
 
-    const agendamentoNovo = agendamentos[index];
+
     let mensagemCliente = "";
-
-
 
     if (
         agendamentoAntigo.status !== agendamentoNovo.status &&
@@ -99,27 +83,24 @@ async function atualizarAgendamento(req, res) {
 
 async function deletarAgendamento(req, res) {
     const id = req.params.id;
-    const index = agendamentos.findIndex(a => a.id === id);
+    const resultado = deletarAgendamentoPorId(id);
 
-    if (index === -1) {
-        return res.status(404).json({ error: 'Agendamento não encontrado.' });
+    if (resultado.erro) {
+        return res.status(resultado.status).json(resultado.resposta);
     }
 
-    const agendamento = agendamentos[index];
-    const numero = agendamento.numero;
+    const mensagemCliente = mensagemCancelamentoAgendamento(resultado.agendamento);
 
-    const mensagemCliente = mensagemCancelamentoAgendamento(agendamento);
-
-    if (numero) {
+    if (resultado.agendamento.numero) {
         try {
-            await enviarMensagemWhatsapp(numero, mensagemCliente);
-            console.log(`mensagem enviada para ${numero}`);
+            await enviarMensagemWhatsapp(resultado.agendamento.numero, mensagemCliente);
+            console.log(`mensagem enviada para ${resultado.agendamento.numero}`);
         } catch (error) {
             console.error(`Error ao enviar mensagem pelo WhatsApp:`, error.message);
         }
     }
-    const deletado = agendamentos.splice(index, 1);
-    res.json({ mensagem: 'Agendamento excluído com sucesso.', deletado });
+
+    res.json({ mensagem: 'Agendamento excluído com sucesso.', agendamento: resultado.agendamento });
 
 }
 
