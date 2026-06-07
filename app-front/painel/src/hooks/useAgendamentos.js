@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import useToast from "./useToast.js";
+import { API_URL } from "../config/api.js";
 
 import { io } from "socket.io-client";
 
@@ -11,7 +12,7 @@ function useAgendamentos() {
     const criarAgendamento = (agendamento) => {
         const agendamentoComStatus = { ...agendamento, status: "pendente" };
 
-        fetch("http://localhost:3000/agendamentos", {
+        fetch(`${API_URL}/agendamentos`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -36,7 +37,7 @@ function useAgendamentos() {
 
         const atualizado = { ...agendamento, status: "confirmado" };
 
-        fetch(`http://localhost:3000/agendamentos/${id}`, {
+        fetch(`${API_URL}/agendamentos/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -60,7 +61,7 @@ function useAgendamentos() {
     }
 
     const editarAgendamento = (id, dadosAtualizados) => {
-        fetch(`http://localhost:3000/agendamentos/${id}`, {
+        fetch(`${API_URL}/agendamentos/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -85,7 +86,7 @@ function useAgendamentos() {
     }
 
     const cancelarAgendamento = (id) => {
-        fetch(`http://localhost:3000/agendamentos/${id}`, {
+        fetch(`${API_URL}/agendamentos/${id}`, {
             method: "DELETE",
         })
             .then((res) => res.json())
@@ -103,7 +104,7 @@ function useAgendamentos() {
     }
 
     useEffect(() => {
-        const socket = io("http://localhost:3000");
+        const socket = io(API_URL);
 
         socket.on("connect", () => {
             console.log("Conectado ao socket.io-client", socket.id);
@@ -131,7 +132,7 @@ function useAgendamentos() {
     }, []);
 
     useEffect(() => {
-        fetch("http://localhost:3000/agendamentos")
+        fetch(`${API_URL}/agendamentos`)
             .then((res) => res.json())
             .then((dados) => {
                 setAgendamentos(dados);

@@ -1,5 +1,5 @@
+import { API_URL } from '../config/api';
 import { createContext, useState, useMemo, useEffect } from 'react';
-
 
 export const ConfigContext = createContext(null);
 
@@ -8,7 +8,7 @@ export function ConfigProvider({ children }) {
 
 
     useEffect(() => {
-        fetch('http://localhost:3000/config')
+        fetch(`${API_URL}/config`)
             .then(res => res.json())
             .then(data => setConfig(data))
             .catch(err => console.error('Erro ao buscar configuração:', err));
@@ -16,7 +16,7 @@ export function ConfigProvider({ children }) {
 
     const salvarConfig = async (novaConfig) => {
         try {
-            const response = await fetch('http://localhost:3000/config', {
+            const response = await fetch(`${API_URL}/config`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novaConfig)
@@ -32,7 +32,7 @@ export function ConfigProvider({ children }) {
 
     const adicionarServico = async (novoServico) => {
         try {
-            const response = await fetch('http://localhost:3000/config/servicos', {
+            const response = await fetch(`${API_URL}/config/servicos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novoServico)
@@ -57,7 +57,7 @@ export function ConfigProvider({ children }) {
 
     const atualizarServico = async (id, servicoAtualizado) => {
         try {
-            const response = await fetch(`http://localhost:3000/config/servicos/${id}`, {
+            const response = await fetch(`${API_URL}/config/servicos/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(servicoAtualizado)
@@ -80,7 +80,7 @@ export function ConfigProvider({ children }) {
 
     const removerServico = async (id) => {
         try {
-            const response = await fetch(`http://localhost:3000/config/servicos/${id}`, {
+            const response = await fetch(`${API_URL}/config/servicos/${id}`, {
                 method: 'DELETE'
             });
 
