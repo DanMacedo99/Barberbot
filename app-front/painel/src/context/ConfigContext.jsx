@@ -1,11 +1,11 @@
-import { createContext, useContext, useState, useMemo, useEffect } from 'react';
-
-const ConfigContext = createContext(null);
+import { createContext, useState, useMemo, useEffect } from 'react';
 
 
+export const ConfigContext = createContext(null);
 
 export function ConfigProvider({ children }) {
     const [config, setConfig] = useState(null);
+
 
     useEffect(() => {
         fetch('http://localhost:3000/config')
@@ -24,23 +24,93 @@ export function ConfigProvider({ children }) {
 
             const data = await response.json();
             setConfig(data.config);
+
         } catch (error) {
             console.error('Erro ao salvar configuração:', error);
         }
     };
 
-    const value = useMemo(() => ({ config, setConfig, salvarConfig }), [config]);
+    const adicionarServico = async (novoServico) => {
+        try {
+            const response = await fetch('http://localhost:3000/config/servicos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novoServico)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao adicionar serviço');
+            }
+
+            setConfig(data.config);
+
+
+            return data.servico;
+
+        } catch (error) {
+            console.error('Erro ao adicionar serviço:', error);
+            throw error;
+        }
+    };
+
+    const atualizarServico = async (id, servicoAtualizado) => {
+        try {
+            const response = await fetch(`http://localhost:3000/config/servicos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(servicoAtualizado)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao atualizar serviço');
+            }
+
+            setConfig(data.config);
+
+            return data.servico;
+        } catch (error) {
+            console.error('Erro ao atualizar serviço:', error);
+            throw error;
+        }
+    };
+
+    const removerServico = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:3000/config/servicos/${id}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao deletar serviço');
+            }
+
+            setConfig(data.config);
+
+        } catch (error) {
+            console.error('Erro ao deletar serviço:', error);
+            throw error;
+        }
+    };
+
+    const value = useMemo(() => ({
+        config,
+        setConfig,
+        salvarConfig,
+        adicionarServico,
+        atualizarServico,
+        removerServico,
+        atualizarServico
+    }), [config]);
 
     return <ConfigContext.Provider value={value}>
         {children}
     </ConfigContext.Provider>;
 }
 
-export function useConfig() {
-    const context = useContext(ConfigContext);
-    if (!context) {
-        throw new Error('useConfig deve ser usado dentro de <ConfigProvider>');
 
-    }
-    return context;
-}

@@ -2,7 +2,7 @@ import './AgendaVisual.css';
 import AgendamentoItem from './AgendamentoItem';
 import AgendaDiaHeader from './AgendaDiaHeader';
 import LinhaHorarioAtual from './LinhaHorarioAtual';
-import { useConfig } from '../../context/ConfigContext';
+import { useConfig } from '../../hooks/useConfig';
 import { useState, useEffect } from 'react';
 import {
     formatarDataLocal,

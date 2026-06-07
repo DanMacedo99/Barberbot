@@ -1,6 +1,7 @@
-import { useConfig } from '../../context/ConfigContext';
+import { useConfig } from '../../hooks/useConfig';
 import { useState } from 'react';
 import { gerarHorariosParaData } from '../../utils/gerarHorariosParaData';
+import useToast from '../../hooks/useToast';
 import './AgendamentoForm.css';
 
 function AgendamentoForm({ onCriar }) {
@@ -8,6 +9,7 @@ function AgendamentoForm({ onCriar }) {
     const hoje = new Date().toISOString().split('T')[0];
     const { config } = useConfig();
     const servicos = config?.servicos || [];
+    const { mensagem, exibirMensagem } = useToast()
     const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
     const [formulario, setFormulario] = useState({
         nome: '',

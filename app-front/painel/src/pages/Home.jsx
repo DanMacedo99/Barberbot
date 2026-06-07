@@ -30,7 +30,7 @@ function Home() {
             <section className="crm-hero">
                 <div>
 
-                    <h1 className="app-title">Painel do Barbeiro</h1>
+                    <h1 className="app-title">Painel</h1>
                     <p className="crm-subtitle">Acompanhe clientes, horarios e status do dia em um painel simples.</p>
                 </div>
 

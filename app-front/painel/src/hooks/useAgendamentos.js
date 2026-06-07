@@ -1,18 +1,12 @@
 import { useState, useRef, useEffect } from "react";
+import useToast from "./useToast.js";
 
 import { io } from "socket.io-client";
 
 function useAgendamentos() {
     const [agendamentos, setAgendamentos] = useState([]);
-    const [mensagem, setMensagem] = useState("");
+    const { mensagem, exibirMensagem } = useToast();
     const criouViaPainel = useRef(false);
-
-    const exibirMensagem = (texto) => {
-        setMensagem(texto);
-        setTimeout(() => {
-            setMensagem("");
-        }, 3000);
-    }
 
     const criarAgendamento = (agendamento) => {
         const agendamentoComStatus = { ...agendamento, status: "pendente" };
@@ -100,7 +94,7 @@ function useAgendamentos() {
                 setAgendamentos((prev) =>
                     prev.filter((item) => item.id !== id)
                 );
-                exibirMensagem(dados.message);
+                exibirMensagem("Agendamento cancelado com sucesso");
             })
             .catch((err) => {
                 console.error("Erro ao cancelar agendamento:", err);

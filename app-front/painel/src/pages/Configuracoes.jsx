@@ -1,21 +1,56 @@
-import { useState } from 'react';
-import { useConfig } from '../context/ConfigContext.jsx';
+import { useState, useEffect } from 'react';
+import { useConfig } from '../hooks/useConfig';
 import PainelLayout from '../layout/PainelLayout.jsx';
+import ServicoForm from '../components/configuracoes/ServicoForm.jsx';
+import useToast from '../hooks/useToast.js';
+import ListaServicos from '../components/configuracoes/ListaServicos.jsx';
 import './Configuracoes.css';
 
 function Configuracoes() {
 
-    const { config, setConfig } = useConfig();
-    const [slotMin, setSlotMin] = useState(config.slotMin);
-    const [funcionamento, setFuncionamento] = useState(config.funcionamento);
-    const [servicos, setServicos] = useState(config.servicos);
+    const { config, salvarConfig, adicionarServico, removerServico, atualizarServico } = useConfig();
+    const { mensagem, exibirMensagem } = useToast();
+    const [slotMin, setSlotMin] = useState(15);
+    const [funcionamento, setFuncionamento] = useState({});
+    const [servicos, setServicos] = useState([]);
+
+    useEffect(() => {
+        if (config) {
+            setSlotMin(config.slotMin);
+            setFuncionamento(config.funcionamento);
+            setServicos(config.servicos);
+        }
+    }, [config]);
 
     const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-    const handleSave = () => {
-        setConfig({ slotMin, funcionamento, servicos });
-        alert('Configurações atualizadas!');
+    const handleSave = async () => {
+        await salvarConfig({ slotMin, funcionamento });
+        exibirMensagem("Configurações atualizadas com sucesso");
     };
+
+    const handleRemoverServico = async (id) => {
+
+        try {
+            await removerServico(id);
+            exibirMensagem('Serviço removido com sucesso')
+        } catch (error) {
+            console.error('Erro ao remover serviço:', error);
+            exibirMensagem('Erro ao remover servico.');
+        }
+
+    }
+
+    const handleAtualizarServico = async (id, servicoAtualizado) => {
+
+        try {
+            await atualizarServico(id, servicoAtualizado);
+            exibirMensagem('Serviço atualizado com sucesso')
+        } catch (error) {
+            console.error('Erro ao atualizar serviço', error)
+            exibirMensagem('Erro ao atualizar serviço')
+        }
+    }
 
     const atualizaHorarioDia = (indexDia, status, novoHorario) => {
         setFuncionamento((prev) => {
@@ -24,7 +59,7 @@ function Configuracoes() {
             const novo = { ...prev };
 
             //se o dia não tiver configuração(null), inicializa com valores padrão
-            if (!novo[indexDia]) novo[indexDia] = { abre: '09:00', fecha: '18:00' };
+            if (!novo[indexDia]) novo[indexDia] = { aberto: true, horaAbertura: '09:00', horaFechamento: '18:00' };
 
             novo[indexDia] = { ...novo[indexDia], [status]: novoHorario };
             return novo;
@@ -34,29 +69,39 @@ function Configuracoes() {
     const alternarFechado = (dia) => {
         setFuncionamento((prev) => {
             const novo = { ...prev };
-            novo[dia] = novo[dia] ? null : { abre: '08:00', fecha: '18:00' };
+            novo[dia] = novo[dia] ? null : { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' };
             return novo;
         });
     }
+    const handleAdicionarServico = async (novoServico) => {
+        try {
+            await adicionarServico(novoServico);
+            exibirMensagem("Serviço adicionado com sucesso");
 
-    const adicionarServico = () => {
-        setServicos((prev) => [...prev, { nome: '', duracao: 30, preco: "" }]);
+        } catch (error) {
+            console.error('Erro ao adicionar serviço:', error);
+            exibirMensagem("Erro ao adicionar serviço");
+        }
     }
 
-    const atualizarServico = (indexServico, campo, novoValor) => {
-        setServicos((prev) => prev.map((servico, i) => (
-            i === indexServico ? { ...servico, [campo]: campo === 'duracao' || campo === 'preco' ? Number(novoValor) : novoValor } : servico
-        )))
-    };
-
-    const removerServico = (index) => {
-        setServicos((prev) => prev.filter((_, idx) => idx !== index));
-    }
 
     const diasAbertos = Object.values(funcionamento || {}).filter(Boolean).length;
 
+    if (!config) {
+        return (
+            <PainelLayout>
+
+                <div className="configuracoes-container">
+                    <p>Carregando configurações...</p>
+                </div>
+            </PainelLayout>
+        );
+    }
+
     return (
         <PainelLayout>
+            {mensagem && <div className="toast-message">{mensagem}</div>}
+
             <div className="configuracoes-container">
 
                 <div className='configuracoes-texto'>
@@ -64,22 +109,20 @@ function Configuracoes() {
                     <section className="configuracoes-hero">
                         <div>
 
-                            <h2 className='configuracoes-title'>Configurações da barbearia</h2>
+                            <h2 className='configuracoes-title'>Configurações da empresa</h2>
                             <p>Controle horários, serviços e o intervalo mínimo usado nos agendamentos.</p>
                         </div>
 
                         <div className="configuracoes-metrics">
-                            <div>
-                                <span>Dias abertos</span>
-                                <strong>{diasAbertos}</strong>
-                            </div>
+
                             <div>
                                 <span>Serviços</span>
                                 <strong>{servicos.length}</strong>
                             </div>
+
                             <div>
-                                <span>Slot</span>
-                                <strong>{slotMin}m</strong>
+                                <span>Dias abertos</span>
+                                <strong>{diasAbertos}</strong>
                             </div>
                         </div>
                     </section>
@@ -87,10 +130,9 @@ function Configuracoes() {
                     <section className="config-card config-slot-card">
                         <div className="config-card-header">
                             <span className="configuracoes-eyebrow">Agenda</span>
-                            <h3>Tempo mínimo de agendamento</h3>
+                            <h3>Sua agenda será exibida com espaços de {slotMin} minutos</h3>
                         </div>
                         <label className="config-field config-field-inline">
-                            <span>Slot (min)</span>
                             <input
                                 type="number"
                                 min={5}
@@ -131,16 +173,16 @@ function Configuracoes() {
                                                         <span>Horário de abertura</span>
                                                         <input
                                                             type='time'
-                                                            value={conf?.abre || '09:00'}
-                                                            onChange={(e) => atualizaHorarioDia(index, 'abre', e.target.value)}
+                                                            value={conf?.horaAbertura || '09:00'}
+                                                            onChange={(e) => atualizaHorarioDia(index, 'horaAbertura', e.target.value)}
                                                         />
                                                     </label>
                                                     <label className="config-field">
                                                         <span>Horário de fechamento</span>
                                                         <input
                                                             type='time'
-                                                            value={conf?.fecha || '18:00'}
-                                                            onChange={(e) => atualizaHorarioDia(index, 'fecha', e.target.value)}
+                                                            value={conf?.horaFechamento || '18:00'}
+                                                            onChange={(e) => atualizaHorarioDia(index, 'horaFechamento', e.target.value)}
                                                         />
                                                     </label>
                                                 </div>
@@ -148,6 +190,10 @@ function Configuracoes() {
                                     </div>
                                 );
                             })}
+
+                            <button className="config-save-button" onClick={handleSave}>
+                                Salvar funcionamento
+                            </button>
                         </div>
                     </section>
 
@@ -157,53 +203,16 @@ function Configuracoes() {
                                 <span className="configuracoes-eyebrow">Catalogo</span>
                                 <h3>Serviços</h3>
                             </div>
-                            <button className="config-secondary-button" onClick={adicionarServico}>Adicionar serviço</button>
                         </div>
-                        <div className="servicos-lista">
-                            {servicos.map((servico, index) => (
-                                <div
-                                    key={index}
-                                    className="servico-item"
-                                >
-                                    <label className="config-field">
-                                        <span>Nome</span>
-                                        <input
-                                            placeholder="Nome do serviço"
-                                            value=""
-                                            onChange={(e) => atualizarServico(index, 'nome', e.target.value)}
-                                        />
-                                    </label>
-                                    <label className="config-field">
-                                        <span>Duração</span>
-                                        <input
-                                            type="number"
-                                            placeholder="Duração (min)"
-                                            min={5}
-                                            step={5}
-                                            value=""
-                                            onChange={(e) => atualizarServico(index, 'duracaoMin', e.target.value)}
-                                        />
-                                    </label>
-                                    <label className="config-field">
-                                        <span>Preço</span>
-                                        <input
-                                            type="number"
-                                            placeholder="Preço"
-                                            min={0}
-                                            step={1}
-                                            value=""
-                                            onChange={(e) => atualizarServico(index, 'preco', e.target.value)}
-                                        />
-                                    </label>
-                                    <button className="config-danger-button" onClick={() => removerServico(index)}>Remover</button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
 
-                    <button className="config-save-button" onClick={handleSave}>
-                        Salvar Configurações
-                    </button>
+                        <ServicoForm onAdicionarServico={handleAdicionarServico} />
+
+                        <ListaServicos
+                            servicos={servicos}
+                            onRemoverServico={handleRemoverServico}
+                            onAtualizarServico={handleAtualizarServico}
+                        />
+                    </section>
 
 
                 </div >
