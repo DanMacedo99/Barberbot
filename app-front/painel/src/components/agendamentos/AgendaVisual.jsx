@@ -4,9 +4,10 @@ import AgendaDiaHeader from './AgendaDiaHeader';
 import LinhaHorarioAtual from './LinhaHorarioAtual';
 import { useConfig } from '../../hooks/useConfig';
 import { useState, useEffect } from 'react';
+import { obterHorariosPorFuncionamento } from '../../utils/obterHorariosPorFuncionamento';
 import {
-    formatarDataLocal,
-    gerarHorarios,
+    formatarDataISO,
+    formatarDataParaExibicao,
     calcularPosicaoLinhaHorarioAtual,
     encontrarServicoDoAgendamento,
     calcularBlocosNecessarios
@@ -31,9 +32,20 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     }
 
     const diaSemana = dataSelecionada.getDay()
-    const dataSelecionadaFormatada = formatarDataLocal(dataSelecionada);
-    const dataAtualFormatada = formatarDataLocal(new Date());
-    const exibindoHoje = dataSelecionadaFormatada === dataAtualFormatada;
+    const dataSelecionadaISO = formatarDataISO(dataSelecionada)
+    const dataSelecionadaExibicao = formatarDataParaExibicao(dataSelecionada);
+    const dataAtualISO = formatarDataISO(new Date());
+    const exibindoHoje = dataSelecionadaISO === dataAtualISO;
+
+
+    const funcionamentoDia = config.funcionamento[diaSemana];
+    const estabelecimentoFechado = !funcionamentoDia || !funcionamentoDia.aberto;
+
+    const intervaloMin = config.slotMin;
+    const horaAberto = funcionamentoDia?.horaAbertura;
+
+    const horarios = obterHorariosPorFuncionamento(dataSelecionadaISO, config);
+    const horariosOcupados = new Set();
 
     function handleChangeDay(daysToAdd) {
         const novaData = new Date(dataSelecionada);
@@ -44,19 +56,6 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     function handleChangeToToday() {
         setDataSelecionada(new Date());
     }
-
-    const funcionamentoDia = config.funcionamento[diaSemana];
-    const estabelecimentoFechado = !funcionamentoDia || !funcionamentoDia.aberto;
-
-
-    const intervaloMin = config.slotMin;
-    const horaAberto = funcionamentoDia?.horaAbertura;
-    const horaFechado = funcionamentoDia?.horaFechamento;
-
-
-
-    const horarios = estabelecimentoFechado ? [] : gerarHorarios(horaAberto, horaFechado, intervaloMin);
-    const horariosOcupados = new Set();
 
     let posicaoLinhaHorarioAtual = null;
 
@@ -73,7 +72,7 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     return (
         <div className="agenda-visual">
             <AgendaDiaHeader
-                dataSelecionadaFormatada={dataSelecionadaFormatada}
+                dataSelecionadaFormatada={dataSelecionadaExibicao}
                 onDiaAnterior={() => handleChangeDay(-1)}
                 onProximoDia={() => handleChangeDay(1)}
                 onHoje={handleChangeToToday}
@@ -93,7 +92,7 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
 
                         const agendamento = agendamentos.find((agendamentoAtual) => {
                             return (
-                                agendamentoAtual.data === dataSelecionadaFormatada &&
+                                agendamentoAtual.data === dataSelecionadaISO &&
                                 agendamentoAtual.horario === horarioAtual
                             )
                         })

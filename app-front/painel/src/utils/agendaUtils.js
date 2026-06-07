@@ -1,10 +1,20 @@
-export function formatarDataLocal(data) {
+export function formatarDataISO(data) {
     const ano = data.getFullYear();
     const mes = String(data.getMonth() + 1).padStart(2, '0');
     const dia = String(data.getDate()).padStart(2, '0');
 
-    return `${dia}-${mes}-${ano}`;
+    return `${ano}-${mes}-${dia}`;
 }
+
+export function formatarDataParaExibicao(data) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+
+    return `${dia}-${mes}-${ano}`
+}
+
+
 
 export function gerarHorarios(inicio, fim, intervaloMin) {
     const horariosGerados = [];

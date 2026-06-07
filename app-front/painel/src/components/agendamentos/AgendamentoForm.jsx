@@ -1,6 +1,6 @@
 import { useConfig } from '../../hooks/useConfig';
 import { useState } from 'react';
-import { gerarHorariosParaData } from '../../utils/gerarHorariosParaData';
+import { obterHorariosPorFuncionamento } from '../../utils/obterHorariosPorFuncionamento';
 import useToast from '../../hooks/useToast';
 import './AgendamentoForm.css';
 
@@ -121,7 +121,7 @@ function AgendamentoForm({ onCriar }) {
                         return;
                     } else {
                         e.target.setCustomValidity('');
-                        const novosHorarios = gerarHorariosParaData(valor, config);
+                        const novosHorarios = obterHorariosPorFuncionamento(valor, config);
                         setHorariosDisponiveis(novosHorarios);
                     }
 

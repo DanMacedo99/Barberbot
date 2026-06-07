@@ -79,7 +79,7 @@ barberbot/
         |   |   |-- Logout.jsx
         |   |   `-- Perfil.jsx
         |   |-- utils/
-        |   |   `-- gerarHorariosParaData.js
+        |   |   `-- obterHorariosPorFuncionamento.js
         |   |-- App.jsx
         |   `-- main.jsx
         |-- package.json
