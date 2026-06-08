@@ -2,16 +2,38 @@ import { useState } from "react";
 import './AgendamentoItem.css';
 import AgendamentoEditor from './AgendamentoEditor';
 
-function AgendamentoItem({ item, onEditar, onCancelar, onConfirmar }) {
+function AgendamentoItem({
+  item,
+  onEditar,
+  onCancelar,
+  onConfirmar,
+  modoCompacto = false,
+  mostrarConteudo = true,
+  onClick
 
-  if (!item) return null;
+}) {
 
   const [editando, setEditando] = useState(false);
   const [formulario, setFormulario] = useState({
-    servico: item.servico,
-    horario: item.horario,
-    nome: item.nome
+    servico: item?.servico || '',
+    horario: item?.horario || '',
+    nome: item?.nome || ''
   });
+
+  if (!item) return null;
+
+  if (modoCompacto) {
+    return (
+      <div className="agendamento-item compacto" onClick={onClick}>
+        {mostrarConteudo && (
+          <>
+            <strong>{item.nome}</strong>
+            <span>{item.servico}</span>
+          </>
+        )}
+      </div>
+    )
+  }
 
   const salvar = () => {
     onEditar(item.id, formulario);

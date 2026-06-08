@@ -1,0 +1,207 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(5, 8, 12, 0.62);
+    backdrop-filter: blur(5px);
+    animation: modal-overlay-in 0.18s ease-out;
+}
+
+.modal-agendamento {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: min(520px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    border: 1px solid rgba(53, 65, 80, 0.92);
+    border-radius: 10px;
+    background: #11151c;
+    color: #eef2f6;
+    padding: 14px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+    animation: modal-card-in 0.2s ease-out;
+}
+
+.modal-fechar {
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin: 0 0 8px;
+    border: 1px solid #354150;
+    border-radius: 6px;
+    background: #171b22;
+    color: #8f9baa;
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.modal-fechar:hover {
+    background: #1f2530;
+    border-color: #4b5a6d;
+    color: #eef2f6;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #2c3440;
+}
+
+.modal-header h2 {
+    margin: 0;
+    min-width: 0;
+    color: #eef2f6;
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 900;
+    word-break: break-word;
+}
+
+.tag-origem {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.tag-origem.whatsapp {
+    color: #89f4dc;
+    background: rgba(25, 179, 148, 0.16);
+    border: 1px solid rgba(25, 179, 148, 0.5);
+}
+
+.tag-origem.painel {
+    color: #d3dae3;
+    background: #1f2530;
+    border: 1px solid #354150;
+}
+
+.modal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid #2c3440;
+    border-radius: 8px;
+    background: #171b22;
+}
+
+.modal-info p {
+    margin: 0;
+    color: #c9d1dc;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.modal-info strong {
+    color: #eef2f6;
+    font-weight: 900;
+}
+
+.modal-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-acoes button {
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid #354150;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #1f2530;
+    color: #eef2f6;
+    font-weight: 800;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.modal-acoes button:hover {
+    background-color: #2a3340;
+    border-color: #4b5a6d;
+}
+
+.modal-acoes .confirmar {
+    border-color: rgba(25, 179, 148, 0.5);
+    background-color: rgba(25, 179, 148, 0.16);
+    color: #89f4dc;
+}
+
+.modal-acoes .cancelar {
+    border-color: rgba(239, 91, 104, 0.42);
+    background-color: rgba(239, 91, 104, 0.12);
+    color: #ff9ca5;
+}
+
+.modal-acoes .editar {
+    border-color: rgba(143, 155, 170, 0.4);
+}
+
+.modal-agendamento.editando .agendamento-editor {
+    box-shadow: none;
+}
+
+@keyframes modal-overlay-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modal-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 560px) {
+    .modal-overlay {
+        align-items: flex-start;
+        padding: 14px;
+    }
+
+    .modal-agendamento {
+        max-height: calc(100vh - 28px);
+        padding: 12px;
+    }
+
+    .modal-header h2 {
+        font-size: 19px;
+    }
+
+    .modal-acoes button {
+        flex: 1 1 120px;
+    }
+}

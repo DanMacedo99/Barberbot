@@ -1,6 +1,7 @@
 import './AgendaVisual.css';
 import AgendamentoItem from './AgendamentoItem';
 import AgendaDiaHeader from './AgendaDiaHeader';
+import AgendamentoModal from './AgendamentoModal';
 import LinhaHorarioAtual from './LinhaHorarioAtual';
 import { useConfig } from '../../hooks/useConfig';
 import { useState, useEffect } from 'react';
@@ -18,6 +19,8 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const { config } = useConfig();
     const [dataSelecionada, setDataSelecionada] = useState(new Date());
     const [horarioAtual, setHorarioAtual] = useState(new Date());
+    const [agendamentoSelecionado, setAgendamentoSelecionado] = useState(null)
+    const ALTURA_SLOT = 56;
 
     useEffect(() => {
         const intervalo = setInterval(() => {
@@ -45,7 +48,30 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const horaAberto = funcionamentoDia?.horaAbertura;
 
     const horarios = obterHorariosPorFuncionamento(dataSelecionadaISO, config);
-    const horariosOcupados = new Set();
+
+    function converterHorarioParaMinutos(horario) {
+        const [horas, minutos] = horario.split(':').map(Number);
+        return horas * 60 + minutos;
+    }
+
+    function calcularEstiloAgendamento(agendamento) {
+        const servicoConfig = encontrarServicoDoAgendamento(agendamento, config.servicos);
+        const duracaoServico = servicoConfig?.duracao || intervaloMin;
+
+        const minutosAbertura = converterHorarioParaMinutos(horaAberto)
+        const minutosAgendamento = converterHorarioParaMinutos(agendamento.horario)
+
+        const minutosDesdeAbertura = minutosAgendamento - minutosAbertura;
+
+        const top = (minutosDesdeAbertura / intervaloMin) * ALTURA_SLOT;
+        const height = (duracaoServico / intervaloMin) * ALTURA_SLOT;
+
+        return {
+            top: `${top}px`,
+            height: `${height}px`,
+            alturaEmPixels: height
+        }
+    }
 
     function handleChangeDay(daysToAdd) {
         const novaData = new Date(dataSelecionada);
@@ -65,12 +91,17 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
             horarioAtual,
             horarioAbertura: horaAberto,
             intervaloMin,
-            alturaBloco: 66
+            alturaBloco: ALTURA_SLOT
         });
     }
 
+    const agendamentosDoDia = agendamentos.filter((agendamentoAtual) => {
+        return agendamentoAtual.data === dataSelecionadaISO;
+    })
+
     return (
         <div className="agenda-visual">
+
             <AgendaDiaHeader
                 dataSelecionadaFormatada={dataSelecionadaExibicao}
                 onDiaAnterior={() => handleChangeDay(-1)}
@@ -78,68 +109,66 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
                 onHoje={handleChangeToToday}
             />
             <div className="agenda-corpo">
-                {posicaoLinhaHorarioAtual !== null && (
-                    <LinhaHorarioAtual posicao={posicaoLinhaHorarioAtual} />
-                )}
-
                 {estabelecimentoFechado ? (
                     <div className="agenda-empty-state">Fechado</div>
                 ) : (
-                    horarios.map((horarioAtual) => {
-                        if (horariosOcupados.has(horarioAtual)) {
-                            return null; // Pula horários já ocupados
-                        }
+                    <>
+                        <div className='grade-horarios'>
 
-                        const agendamento = agendamentos.find((agendamentoAtual) => {
-                            return (
-                                agendamentoAtual.data === dataSelecionadaISO &&
-                                agendamentoAtual.horario === horarioAtual
-                            )
-                        })
-
-                        if (!agendamento) {
-                            return (
+                            {horarios.map((horarioAtual) => (
                                 <div className='bloco-horario livre' key={horarioAtual}>
                                     <div className='hora'>{horarioAtual}</div>
                                     <div className='conteudo'>
-                                        <span className='disponivel'>Disponível</span>
+
                                     </div>
+
                                 </div>
-                            );
-                        }
+                            ))}
+                        </div>
+                        <div className='camada-agendamentos'>
+                            {agendamentosDoDia.map((agendamento) => {
+                                const estiloAgendamento = calcularEstiloAgendamento(agendamento)
+                                const mostrarConteudo = estiloAgendamento.alturaEmPixels >= 40;
+                                return (
+                                    <div
+                                        key={agendamento.id}
+                                        className='agendamento-sobreposto'
+                                        style={{
+                                            top: estiloAgendamento.top,
+                                            height: estiloAgendamento.height
+                                        }}
+                                    >
+                                        <AgendamentoItem
+                                            item={agendamento}
+                                            onEditar={onEditar}
+                                            onCancelar={onCancelar}
+                                            onConfirmar={onConfirmar}
+                                            modoCompacto={true}
+                                            mostrarConteudo={mostrarConteudo}
+                                            onClick={() => setAgendamentoSelecionado(agendamento)}
+                                        />
 
-                        const servicoConfig = encontrarServicoDoAgendamento(agendamento, config.servicos);
-                        const blocosNecessarios = calcularBlocosNecessarios(servicoConfig, intervaloMin);
+                                    </div>
+                                )
 
-                        const indexInicial = horarios.indexOf(horarioAtual);
-                        for (let i = 0; i < blocosNecessarios; i++) {
-                            horariosOcupados.add(horarios[indexInicial + i]);
+                            })}
+                        </div>
+                    </>
+                )}
 
-                        }
-                        return (
-                            <div
-                                className="bloco-horario ocupado"
-                                key={horarioAtual}
-                                style={{ height: `${blocosNecessarios * 50}px` }}
-                            >
-                                <div className="hora">{horarioAtual}</div>
-                                <div className="conteudo">
-
-                                    <AgendamentoItem
-                                        item={agendamento}
-                                        onEditar={onEditar}
-                                        onCancelar={onCancelar}
-                                        onConfirmar={onConfirmar}
-                                    />
-                                </div>
-                            </div>
-
-                        );
-
-                    })
-
+                {posicaoLinhaHorarioAtual !== null && (
+                    <LinhaHorarioAtual posicao={posicaoLinhaHorarioAtual} />
                 )}
             </div>
+            {agendamentoSelecionado && (
+                <AgendamentoModal
+                    agendamento={agendamentoSelecionado}
+                    onFechar={() => setAgendamentoSelecionado(null)}
+                    onEditar={onEditar}
+                    onCancelar={onCancelar}
+                    onConfirmar={onConfirmar}
+                />
+            )}
         </div>
 
 

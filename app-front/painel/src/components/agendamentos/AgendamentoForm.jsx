@@ -29,7 +29,7 @@ function AgendamentoForm({ onCriar }) {
     const handleSubmit = () => {
         const { nome, servico, data, horario } = formulario;
         if (!nome || !servico || !data || !horario) {
-            alert('Preencha todos os campos!');
+            exibirMensagem('Preencha todos os campos!');
             return;
         }
 
@@ -39,12 +39,12 @@ function AgendamentoForm({ onCriar }) {
         const funcionamentoDia = config.funcionamento[diaSemana];
 
         if (data < hoje) {
-            alert('Data inválida. não é possivel agendar no passado.');
+            exibirMensagem('Data inválida. não é possivel agendar no passado.');
             return;
         }
 
-        if (!funcionamentoDia) {
-            alert("Esse dia da semana não está disponível para agendamentos.");
+        if (!funcionamentoDia?.aberto) {
+            exibirMensagem("Esse dia da semana não está disponível para agendamentos.");
             return;
         }
 
@@ -68,6 +68,7 @@ function AgendamentoForm({ onCriar }) {
     return (
         <div className='agendamento-form'>
             <h2>Novo Agendamento</h2>
+            {mensagem && <p className='toast-message'>{mensagem}</p>}
             <input
                 type="text"
                 name="nome"
@@ -116,7 +117,7 @@ function AgendamentoForm({ onCriar }) {
                         e.target.setCustomValidity('Data inválida. Escolha a partir de hoje.');
                         setHorariosDisponiveis([]);
                     } else if (!funcionamentoDia?.aberto) {
-                        alert('O estabelecimento está fechado nesse dia. Escolha outra data.');
+                        exibirMensagem('O estabelecimento está fechado nesse dia. Escolha outra data.');
                         setHorariosDisponiveis([]);
                         return;
                     } else {

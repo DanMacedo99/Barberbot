@@ -4,7 +4,7 @@ Sistema de agendamento para barbearia com backend Node.js/Express, integracao co
 
 O projeto e dividido em duas partes principais:
 
-- `app-back`: API, regras de agendamento, configuracoes, WebSocket, webhook do WhatsApp e integracoes.
+- `app-back`: API, regras de agendamento, configuracoes, services, WebSocket, webhook do WhatsApp e integracoes.
 - `app-front/painel`: painel web para criar, visualizar, editar, confirmar e cancelar agendamentos.
 
 ## Tecnologias
@@ -47,6 +47,10 @@ barberbot/
 |   |   |-- agendamentos.js
 |   |   |-- config.js
 |   |   `-- whatsappWebhook.js
+|   |-- services/
+|   |   |-- agendamentoService.js
+|   |   |-- configService.js
+|   |   `-- whatsappService.js
 |   |-- utils/
 |   |   |-- openaiClient.js
 |   |   |-- socket.js
@@ -59,17 +63,27 @@ barberbot/
         |-- src/
         |   |-- components/
         |   |   |-- Navbar.jsx
-        |   |   `-- agendamentos/
-        |   |       |-- AgendaVisual.jsx
-        |   |       |-- AgendamentoEditor.jsx
-        |   |       |-- AgendamentoForm.jsx
-        |   |       |-- AgendamentoItem.jsx
-        |   |       |-- ListaAgendamentos.jsx
-        |   |       `-- VisualizacaoSelector.jsx
+        |   |   |-- agendamentos/
+        |   |   |   |-- AgendaDiaHeader.jsx
+        |   |   |   |-- AgendaVisual.jsx
+        |   |   |   |-- AgendamentoEditor.jsx
+        |   |   |   |-- AgendamentoForm.jsx
+        |   |   |   |-- AgendamentoItem.jsx
+        |   |   |   |-- LinhaHorarioAtual.jsx
+        |   |   |   |-- ListaAgendamentos.jsx
+        |   |   |   `-- VisualizacaoSelector.jsx
+        |   |   `-- configuracoes/
+        |   |       |-- ListaServicos.jsx
+        |   |       |-- ServicoForm.jsx
+        |   |       `-- ServicoItem.jsx
+        |   |-- config/
+        |   |   `-- api.js
         |   |-- context/
         |   |   `-- ConfigContext.jsx
         |   |-- hooks/
-        |   |   `-- useAgendamentos.js
+        |   |   |-- useAgendamentos.js
+        |   |   |-- useConfig.js
+        |   |   `-- useToast.js
         |   |-- layout/
         |   |   `-- PainelLayout.jsx
         |   |-- pages/
@@ -79,6 +93,7 @@ barberbot/
         |   |   |-- Logout.jsx
         |   |   `-- Perfil.jsx
         |   |-- utils/
+        |   |   |-- agendaUtils.js
         |   |   `-- obterHorariosPorFuncionamento.js
         |   |-- App.jsx
         |   `-- main.jsx
@@ -141,6 +156,20 @@ TWILIO_MY_NUMBER_TEST=whatsapp:+000000000000
 ENVIAR_MENSAGEM=false
 ```
 
+## Configuracao de API no Frontend
+
+O frontend centraliza a URL do backend em:
+
+```text
+app-front/painel/src/config/api.js
+```
+
+Valor atual:
+
+```js
+export const API_URL = 'http://localhost:3000';
+```
+
 ## Funcionalidades
 
 ### Painel Administrativo
@@ -150,37 +179,43 @@ ENVIAR_MENSAGEM=false
 - Selecao de servico a partir do catalogo configurado.
 - Validacao para impedir agendamentos em datas passadas.
 - Validacao de dias fechados conforme configuracao da barbearia.
-- Mensagens temporarias de feedback para acoes do painel.
+- Mensagens temporarias de feedback via hook `useToast`.
 - Atualizacao em tempo real quando um novo agendamento e criado via Socket.IO.
 
 ### Visualizacoes de Agenda
 
 - Visualizacao em lista dos agendamentos.
 - Visualizacao em agenda visual por dia.
-- Navegacao entre dia anterior, hoje e proximo dia.
+- Header navegavel da agenda com dia anterior, hoje e proximo dia.
 - Indicacao de horarios disponiveis e ocupados.
-- Linha do horario atual quando a agenda esta exibindo o dia de hoje.
+- Linha do horario atual em componente separado.
 - Bloqueio visual de duracao conforme o tempo do servico.
+- Utilitarios de agenda separados em `agendaUtils.js`.
 - Acoes de editar, confirmar e cancelar a partir dos itens da agenda.
 
-### Configuracoes da Barbearia
+### Configuracoes da Empresa
 
 - Pagina dedicada de configuracoes.
-- Metricas de dias abertos, quantidade de servicos e intervalo de slot.
+- Metricas de dias abertos e quantidade de servicos.
 - Configuracao do intervalo minimo de agendamento (`slotMin`).
 - Configuracao de funcionamento por dia da semana.
 - Possibilidade de abrir ou fechar dias especificos.
 - Campos de horario de abertura e fechamento.
-- Cadastro, edicao e remocao de servicos.
-- Cada servico pode ter nome, duracao e preco.
+- Cadastro, edicao e remocao de servicos em componentes proprios.
+- Cada servico possui `id`, nome, duracao e preco.
+- Atualizacao da configuracao pelo `ConfigContext` e hook `useConfig`.
 
 ### Backend
 
 - API REST para agendamentos.
 - API REST para configuracoes.
+- API REST separada para CRUD de servicos.
+- Camada de `services` para regras de agendamento, configuracao e mensagens.
 - Validacao de campos obrigatorios ao criar agendamento.
 - Validacao de servico existente.
 - Verificacao de conflito de horarios usando a duracao do servico.
+- Validacao de horario passado.
+- Validacao de horario dentro do funcionamento configurado.
 - Status inicial `pendente` para novos agendamentos.
 - Confirmacao, edicao e cancelamento de agendamentos.
 - Envio de mensagens pelo WhatsApp ao confirmar, alterar horario ou cancelar agendamentos.
@@ -191,9 +226,10 @@ ENVIAR_MENSAGEM=false
 - Webhook para receber mensagens do WhatsApp via Twilio.
 - Registro das mensagens recebidas em memoria.
 - Interpretacao da mensagem com OpenAI para extrair servico, data e hora.
+- Busca de servico por nome para criar agendamentos via conversa.
 - Controle de fluxo por numero de telefone enquanto faltam informacoes do agendamento.
 - Criacao automatica de agendamento pendente quando servico, data e horario sao identificados.
-- Respostas automaticas solicitando informacoes faltantes.
+- Respostas automaticas para servico nao encontrado, dados faltantes e agendamento recebido.
 - Emissao de evento `agendamento-criado` para atualizar o painel em tempo real.
 
 ## Rotas Principais
@@ -218,6 +254,14 @@ DELETE /agendamentos/:id
 ```text
 GET /config
 PUT /config
+```
+
+### Servicos
+
+```text
+POST   /config/servicos
+PUT    /config/servicos/:id
+DELETE /config/servicos/:id
 ```
 
 ### WhatsApp

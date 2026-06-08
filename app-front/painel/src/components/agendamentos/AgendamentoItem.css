@@ -77,3 +77,35 @@
 .agendamento-item .editar {
     border-color: rgba(143, 155, 170, 0.4);
 }
+
+.agendamento-item.compacto {
+    min-height: 0;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(1px, 7cqh, 5px);
+    padding: clamp(4px, 14cqh, 12px) clamp(7px, 2.8cqw, 12px);
+}
+
+.agendamento-item.compacto strong,
+.agendamento-item.compacto span {
+    display: block;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+    line-height: 1.08;
+}
+
+.agendamento-item.compacto strong {
+    color: #eef2f6;
+    font-size: clamp(11px, 24cqh, 14px);
+    font-weight: 900;
+}
+
+.agendamento-item.compacto span {
+    color: #aab5c3;
+    font-size: clamp(10px, 20cqh, 12px);
+    font-weight: 800;
+}

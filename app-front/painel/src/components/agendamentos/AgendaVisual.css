@@ -12,7 +12,33 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
+}
+
+.grade-horarios {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+}
+
+.camada-agendamentos {
+    position: absolute;
+    top: 0;
+    left: 94px;
+    right: 12px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.agendamento-sobreposto {
+    position: absolute;
+    left: 0;
+    right: 0;
+    container-type: size;
+    container-name: agendamento;
+    pointer-events: auto;
 }
 
 
@@ -22,14 +48,14 @@
     gap: 14px;
     min-height: 56px;
     border: 1px solid #2c3440;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 0px;
+    padding: 4px 12px 10px;
     background: #11151c;
     color: #eef2f6;
 }
 
 .bloco-horario.livre {
-    align-items: center;
+    align-items: flex-start;
     background: rgba(17, 21, 28, 0.66);
 }
 
@@ -44,7 +70,7 @@
     color: #35d2ae;
     font-size: 14px;
     font-weight: 900;
-    line-height: 1.4;
+    line-height: 1;
     white-space: nowrap;
 }
 
@@ -86,7 +112,7 @@
 @media (max-width: 560px) {
     .bloco-horario {
         gap: 10px;
-        padding: 10px;
+        padding: 4px 10px 10px;
     }
 
     .bloco-horario .hora {
