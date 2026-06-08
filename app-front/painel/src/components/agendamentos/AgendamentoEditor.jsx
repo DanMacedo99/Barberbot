@@ -1,15 +1,21 @@
 import { useState } from 'react';
+import { useConfig } from '../../hooks/useConfig';
 import './AgendamentoEditor.css';
 
 function AgendamentoEditor({ item, onConfirmar, onCancelar }) {
     const [formulario, setFormulario] = useState({
-        nome: item.nome,
-        servico: item.servico,
-        horario: item.horario
+        nome: item.nome || "",
+        numero: item.numero || "",
+        servicoId: item.servicoId || "",
+        data: item.data || "",
+        horario: item.horario || ""
 
     });
+    const { config } = useConfig();
+    const servicos = config?.servicos || [];
 
     const salvar = () => {
+        console.log('Dados enviados', formulario)
         onConfirmar(item.id, formulario);
     };
 
@@ -25,13 +31,35 @@ function AgendamentoEditor({ item, onConfirmar, onCancelar }) {
                 placeholder='Nome do cliente'
             />
             <input
-                type='text'
-                value={formulario.servico}
+                type='tel'
+                value={formulario.numero}
                 onChange={(e) =>
-                    setFormulario({ ...formulario, servico: e.target.value })
+                    setFormulario({ ...formulario, numero: e.target.value })
                 }
-                placeholder='Serviço'
+                placeholder='Telefone do cliente'
             />
+
+
+            <select
+                name="servicoId"
+                value={formulario.servicoId}
+                onChange={(e) => setFormulario({ ...formulario, servicoId: Number(e.target.value) })}
+            >
+                <option value="">Selecione um serviço</option>
+                {servicos.map((servico) => (
+                    <option key={servico.id} value={servico.id}>
+                        {servico.nome} - {servico.duracao} min - €{servico.preco}
+                    </option>
+                ))}
+            </select>
+
+            <input
+                type="date"
+                value={formulario.data}
+                onChange={(e) => setFormulario({ ...formulario, data: e.target.value })}
+
+            />
+
             <input
                 type='time'
                 value={formulario.horario}

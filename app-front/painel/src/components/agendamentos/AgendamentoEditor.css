@@ -57,6 +57,31 @@
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+.agendamento-editor select {
+    box-sizing: border-box;
+    padding: 12px 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #2c3440;
+    width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+    background-color: #11151c;
+    color: #eef2f6;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.agendamento-editor select:hover {
+    border-color: #3d4856;
+}
+
+.agendamento-editor input:focus,
+.agendamento-editor select:focus {
+    background-color: #151b23;
+    border-color: #19b394;
+    box-shadow: 0 0 0 3px rgba(25, 179, 148, 0.12);
+}
+
 .agendamento-editor button:hover {
     background-color: #2a3340;
     border-color: #4b5a6d;

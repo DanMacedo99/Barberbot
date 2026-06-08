@@ -10,8 +10,10 @@ import {
     formatarDataISO,
     formatarDataParaExibicao,
     calcularPosicaoLinhaHorarioAtual,
-    encontrarServicoDoAgendamento,
-    calcularBlocosNecessarios
+    horarioEstaDentroDoFuncionamentoAtual,
+    calcularEstiloAgendamentoVisual,
+    filtrarAgendamentosPorData,
+    buscarAgendamentoPorId
 } from '../../utils/agendaUtils';
 
 
@@ -19,7 +21,7 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     const { config } = useConfig();
     const [dataSelecionada, setDataSelecionada] = useState(new Date());
     const [horarioAtual, setHorarioAtual] = useState(new Date());
-    const [agendamentoSelecionado, setAgendamentoSelecionado] = useState(null)
+    const [agendamentoSelecionadoId, setAgendamentoSelecionadoId] = useState(null)
     const ALTURA_SLOT = 56;
 
     useEffect(() => {
@@ -49,29 +51,6 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
 
     const horarios = obterHorariosPorFuncionamento(dataSelecionadaISO, config);
 
-    function converterHorarioParaMinutos(horario) {
-        const [horas, minutos] = horario.split(':').map(Number);
-        return horas * 60 + minutos;
-    }
-
-    function calcularEstiloAgendamento(agendamento) {
-        const servicoConfig = encontrarServicoDoAgendamento(agendamento, config.servicos);
-        const duracaoServico = servicoConfig?.duracao || intervaloMin;
-
-        const minutosAbertura = converterHorarioParaMinutos(horaAberto)
-        const minutosAgendamento = converterHorarioParaMinutos(agendamento.horario)
-
-        const minutosDesdeAbertura = minutosAgendamento - minutosAbertura;
-
-        const top = (minutosDesdeAbertura / intervaloMin) * ALTURA_SLOT;
-        const height = (duracaoServico / intervaloMin) * ALTURA_SLOT;
-
-        return {
-            top: `${top}px`,
-            height: `${height}px`,
-            alturaEmPixels: height
-        }
-    }
 
     function handleChangeDay(daysToAdd) {
         const novaData = new Date(dataSelecionada);
@@ -86,7 +65,11 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
     let posicaoLinhaHorarioAtual = null;
 
 
-    if (exibindoHoje && !estabelecimentoFechado) {
+    if (exibindoHoje && !estabelecimentoFechado && horarioEstaDentroDoFuncionamentoAtual({
+        horarioAtual,
+        horaAbertura: funcionamentoDia.horaAbertura,
+        horaFechamento: funcionamentoDia.horaFechamento
+    })) {
         posicaoLinhaHorarioAtual = calcularPosicaoLinhaHorarioAtual({
             horarioAtual,
             horarioAbertura: horaAberto,
@@ -95,9 +78,12 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
         });
     }
 
-    const agendamentosDoDia = agendamentos.filter((agendamentoAtual) => {
-        return agendamentoAtual.data === dataSelecionadaISO;
-    })
+    const agendamentosDoDia = filtrarAgendamentosPorData(agendamentos, dataSelecionadaISO);
+
+    const agendamentoSelecionado = buscarAgendamentoPorId(
+        agendamentos,
+        agendamentoSelecionadoId
+    );
 
     return (
         <div className="agenda-visual">
@@ -127,7 +113,13 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
                         </div>
                         <div className='camada-agendamentos'>
                             {agendamentosDoDia.map((agendamento) => {
-                                const estiloAgendamento = calcularEstiloAgendamento(agendamento)
+                                const estiloAgendamento = calcularEstiloAgendamentoVisual({
+                                    agendamento,
+                                    servicos: config.servicos,
+                                    horarioAbertura: horaAberto,
+                                    intervaloMin,
+                                    alturaSlot: ALTURA_SLOT
+                                })
                                 const mostrarConteudo = estiloAgendamento.alturaEmPixels >= 40;
                                 return (
                                     <div
@@ -145,7 +137,7 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
                                             onConfirmar={onConfirmar}
                                             modoCompacto={true}
                                             mostrarConteudo={mostrarConteudo}
-                                            onClick={() => setAgendamentoSelecionado(agendamento)}
+                                            onClick={() => setAgendamentoSelecionadoId(agendamento.id)}
                                         />
 
                                     </div>
@@ -163,7 +155,7 @@ function AgendaVisual({ agendamentos, onEditar, onCancelar, onConfirmar }) {
             {agendamentoSelecionado && (
                 <AgendamentoModal
                     agendamento={agendamentoSelecionado}
-                    onFechar={() => setAgendamentoSelecionado(null)}
+                    onFechar={() => setAgendamentoSelecionadoId(null)}
                     onEditar={onEditar}
                     onCancelar={onCancelar}
                     onConfirmar={onConfirmar}

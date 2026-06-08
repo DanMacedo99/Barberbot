@@ -193,6 +193,7 @@ function atualizarAgendamentoPorId(id, novosDados) {
     agendamentos[index] = {
         ...agendamentos[index],
         nome: novosDados.nome || agendamentos[index].nome,
+        numero: novosDados.numero ?? agendamentos[index].numero,
         servicoId: novosDados.servicoId || agendamentos[index].servicoId,
         data: novosDados.data || agendamentos[index].data,
         horario: novosDados.horario || agendamentos[index].horario,

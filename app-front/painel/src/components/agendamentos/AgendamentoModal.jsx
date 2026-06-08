@@ -40,6 +40,13 @@ function AgendamentoModal({
         onFechar();
     }
 
+    function formatarDataParModal(dataISO) {
+        if (!dataISO) return 'não informada';
+        const [ano, mes, dia] = dataISO.split('-');
+
+        return `${dia}/${mes}/${ano}`
+    }
+
     return (
         <div className='modal-overlay' onClick={onFechar}>
             <div className={`modal-agendamento ${editando ? 'editando' : ''}`} onClick={(e) => e.stopPropagation()}>
@@ -64,7 +71,7 @@ function AgendamentoModal({
                         <div className="modal-info">
                             <p><strong>Serviço:</strong> {agendamento.servico}</p>
                             <p><strong>Telefone:</strong> {agendamento.numero || 'Não informado'}</p>
-                            <p><strong>Data:</strong> {agendamento.data}</p>
+                            <p><strong>Data:</strong> {formatarDataParModal(agendamento.data)}</p>
                             <p><strong>Horário:</strong> {agendamento.horario}</p>
                             <p><strong>Status:</strong> {agendamento.status}</p>
                         </div>

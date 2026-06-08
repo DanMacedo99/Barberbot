@@ -11,8 +11,10 @@ function AgendamentoForm({ onCriar }) {
     const servicos = config?.servicos || [];
     const { mensagem, exibirMensagem } = useToast()
     const [horariosDisponiveis, setHorariosDisponiveis] = useState([]);
+
     const [formulario, setFormulario] = useState({
         nome: '',
+        numero: '',
         servico: '',
         data: '',
         horario: '',
@@ -56,6 +58,7 @@ function AgendamentoForm({ onCriar }) {
 
         setFormulario({
             nome: '',
+            numero: '',
             servico: '',
             data: '',
             horario: ''
@@ -76,6 +79,13 @@ function AgendamentoForm({ onCriar }) {
                 value={formulario.nome}
                 onChange={handleChange}
             />
+            <input
+                type="tel"
+                name="numero"
+                placeholder="Telefone do cliente (opcional)"
+                value={formulario.numero}
+                onChange={handleChange}
+            />
             <select
                 name="servico"
                 value={formulario.servico}
@@ -84,7 +94,7 @@ function AgendamentoForm({ onCriar }) {
                 <option value="">Selecione um serviço</option>
                 {servicos.map((servico) => (
                     <option key={servico.id} value={servico.id}>
-                        {servico.nome} - {servico.duracao} min - R$ {servico.preco}
+                        {servico.nome} - {servico.duracao} min - €{servico.preco}
                     </option>
                 ))}
             </select>
