@@ -25,8 +25,16 @@ function Configuracoes() {
     const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
     const handleSave = async () => {
-        await salvarConfig({ slotMin, funcionamento });
-        exibirMensagem("Configurações atualizadas com sucesso");
+        try {
+            await salvarConfig({ slotMin, funcionamento });
+            exibirMensagem("Configurações atualizadas com sucesso");
+        } catch (error) {
+            console.error('Erro ao salvar configurações:', error)
+            exibirMensagem('Erro ao salvar configurações');
+
+            setSlotMin(config.slotMin);
+            setFuncionamento(config.funcionamento);
+        }
     };
 
     const handleRemoverServico = async (id) => {

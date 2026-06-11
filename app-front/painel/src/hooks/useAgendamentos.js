@@ -68,18 +68,32 @@ function useAgendamentos() {
             },
             body: JSON.stringify(dadosAtualizados),
         })
-            .then((res) => res.json())
-            .then((dados) => {
+            .then(async (res) => {
+                const dados = await res.json();
+
+                if (!res.ok) {
+                    throw dados;
+                }
+
+                return dados;
+
+            }).then((dados) => {
                 console.log("Agendamento editado:", dados.agendamento);
                 setAgendamentos((prev) =>
                     prev.map((item) =>
                         item.id === id ? dados.agendamento : item
                     )
                 );
-                exibirMensagem(dados.message);
+                exibirMensagem(dados.message || 'agendamento editado com sucesso');
             })
             .catch((err) => {
                 console.error("Erro ao editar agendamento:", err);
+
+                const mensagemErro =
+                    err.message ||
+                    err.error ||
+                    err.detalhe?.[0] ||
+                    'erro ao editar agendamento';
                 exibirMensagem("Erro ao editar agendamento");
             });
 

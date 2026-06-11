@@ -4,7 +4,7 @@ module.exports = {
         1: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         2: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         3: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
-        4: null,
+        4: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         5: { aberto: true, horaAbertura: '08:00', horaFechamento: '18:00' },
         6: { aberto: true, horaAbertura: '09:00', horaFechamento: '18:00' },
         0: { aberto: true, horaAbertura: '13:00', horaFechamento: '23:00' }

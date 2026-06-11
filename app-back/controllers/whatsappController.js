@@ -48,7 +48,7 @@ async function receberMensagemWhatsapp(req, res) {
         fluxoAgendamentos[numero] = {
             servico: null,
             data: null,
-            horario: null
+            hora: null
         }
 
     }

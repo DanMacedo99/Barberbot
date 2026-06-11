@@ -23,10 +23,22 @@ export function ConfigProvider({ children }) {
             });
 
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.detalhes?.[0] ||
+                    data.error ||
+                    'Erro ao salvar configurações'
+                );
+            }
+
             setConfig(data.config);
+
+            return data.config
 
         } catch (error) {
             console.error('Erro ao salvar configuração:', error);
+            throw error;
         }
     };
 

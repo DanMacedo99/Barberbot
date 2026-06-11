@@ -1,5 +1,6 @@
 const agendamentos = require('../data/agendamentos');
 const config = require('../data/config');
+const { validarAgendamento } = require('../validators/agendamentoValidator');
 
 function criarDataHora(data, horario) {
     return new Date(`${data}T${horario}`);
@@ -22,7 +23,7 @@ function verificarConflito(inicioAgendamentoNovo, fimAgendamentoNovo, inicioAgen
     );
 }
 
-function existeConflito(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento) {
+function existeConflito(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento, ignoraId = null) {
     const inicioAgendamentoNovo = criarDataHora(dataNovoAgendamento, horarioNovoAgendamento);
     const fimAgendamentoNovo = calcularFimAgendamento(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovoAgendamento);
 
@@ -30,6 +31,11 @@ function existeConflito(dataNovoAgendamento, horarioNovoAgendamento, duracaoNovo
     const agendamentosNoMesmoDia = agendamentos.filter((agendamentoExistente) => { return agendamentoExistente.data === dataNovoAgendamento });
 
     for (const agendamentoExistente of agendamentosNoMesmoDia) {
+
+        if (agendamentoExistente.id === ignoraId) {
+            continue;
+        }
+
         const servicoAgendamentoExistente = buscarServicoPorId(agendamentoExistente.servicoId);
         if (!servicoAgendamentoExistente) {
             continue;
@@ -65,14 +71,26 @@ function buscarServicoPorId(servicoId) {
     return config.servicos.find((servico) => { return servico.id === Number(servicoId) });
 }
 
-function criarNovoAgendamento({ nome, servicoId, data, horario, numero = null, origem = 'painel' }) {
-    if (!nome || !servicoId || !data || !horario) {
+function criarNovoAgendamento(dadosRecebidos) {
+    const validacao = validarAgendamento({
+        ...dadosRecebidos,
+        origem: dadosRecebidos.origem || 'painel',
+        status: dadosRecebidos.status || 'pendente'
+    });
+
+    if (!validacao.valido) {
         return {
             erro: true,
             status: 400,
-            resposta: { error: 'Preencha todos os campos, nome, serviço, data e horário são necessários.' }
+            resposta: {
+                error: 'Dados inválidos.',
+                detalhes: validacao.erros
+            }
         }
-    };
+    }
+
+    const { nome, servicoId, data, horario, numero = null, origem = 'painel' } = validacao.dados;
+
 
     const servicoEncontrado = buscarServicoPorId(servicoId);
 
@@ -118,6 +136,7 @@ function criarNovoAgendamento({ nome, servicoId, data, horario, numero = null, o
             }
         }
     };
+
 
     const novoAgendamento = {
         id: Date.now().toString(),
@@ -189,22 +208,99 @@ function atualizarAgendamentoPorId(id, novosDados) {
 
     const agendamentoAntigo = { ...agendamentos[index] };
 
+    const dadosMesclados = {
+        ...agendamentos[index],
+        ...novosDados
+    };
+
+    const dadosParaValidar = {
+        nome: dadosMesclados.nome,
+        numero: dadosMesclados.numero,
+        servicoId: dadosMesclados.servicoId,
+        data: dadosMesclados.data,
+        horario: dadosMesclados.horario,
+        origem: dadosMesclados.origem,
+        status: dadosMesclados.status
+    };
+
+    const validacao = validarAgendamento(dadosParaValidar);
+
+    if (!validacao.valido) {
+        return {
+            erro: true,
+            status: 400,
+            resposta: {
+                error: 'Dados inválidos.',
+                detalhes: validacao.erros
+            }
+        }
+    }
+
+    const servicoEncontrado = buscarServicoPorId(validacao.dados.servicoId);
+
+    if (!servicoEncontrado) {
+        return {
+            erro: true,
+            status: 400,
+            resposta: { error: 'Serviço inválido.' }
+        };
+    }
+
+    const alterouAgenda =
+        validacao.dados.data !== agendamentos[index].data ||
+        validacao.dados.horario !== agendamentos[index].horario ||
+        Number(validacao.dados.servicoId) !== Number(agendamentos[index].servicoId);
+
+
+    if (alterouAgenda) {
+        if (horarioEstaNoPassado(validacao.dados.data, validacao.dados.horario)) {
+            return {
+                erro: true,
+                status: 400,
+                resposta: {
+                    error: 'Este horário já passou.',
+                    message: 'Este horário já passou, por favor escolha outro horário ou data para o seu agendamento.'
+                }
+            };
+        }
+    }
+
+    if (!horarioDentroDoFuncionamento(validacao.dados.data, validacao.dados.horario, servicoEncontrado.duracao)) {
+        return {
+            erro: true,
+            status: 400,
+            resposta: { error: 'Horário fora do horário de funcionamento.' }
+        };
+    }
+
+    const conflito = existeConflito(
+        validacao.dados.data,
+        validacao.dados.horario,
+        servicoEncontrado.duracao,
+        id
+    );
+
+    if (conflito) {
+        return {
+            erro: true,
+            status: 409,
+            resposta: {
+                error: 'Já existe um agendamento neste horário.',
+                message: 'Por favor, escolha outro horário ou data para o seu agendamento.'
+            }
+        };
+    }
 
     agendamentos[index] = {
         ...agendamentos[index],
-        nome: novosDados.nome || agendamentos[index].nome,
-        numero: novosDados.numero ?? agendamentos[index].numero,
-        servicoId: novosDados.servicoId || agendamentos[index].servicoId,
-        data: novosDados.data || agendamentos[index].data,
-        horario: novosDados.horario || agendamentos[index].horario,
-        status: novosDados.status || agendamentos[index].status
+        ...validacao.dados
     };
 
-    const servicoEncontrado = buscarServicoPorId(agendamentos[index].servicoId);
+    const servicoFormatado = buscarServicoPorId(agendamentos[index].servicoId);
 
     const agendamentoNovo = {
         ...agendamentos[index],
-        servico: servicoEncontrado ? servicoEncontrado.nome : 'Serviço não encontrado'
+        servico: servicoFormatado ? servicoFormatado.nome : 'Serviço não encontrado'
     };
 
     return { erro: false, agendamentoAntigo, agendamentoNovo };

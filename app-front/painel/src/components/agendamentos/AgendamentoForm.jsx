@@ -51,9 +51,13 @@ function AgendamentoForm({ onCriar }) {
         }
 
         onCriar({
-            ...formulario,
+            nome: formulario.nome,
+            numero: formulario.numero,
             servicoId: Number(formulario.servico),
-            status: 'pendente'
+            data: formulario.data,
+            horario: formulario.horario,
+            status: 'pendente',
+            origem: 'painel'
         });
 
         setFormulario({

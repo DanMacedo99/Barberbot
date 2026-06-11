@@ -1,20 +1,26 @@
 const config = require('../data/config')
+const { validarServico } = require('../validators/serviceValidator')
+const { validarConfig } = require('../validators/configValidator')
 
 function obterConfig() {
     return config;
 }
 
 function atualizarConfig(novaConfig) {
-    const { slotMin, funcionamento } = novaConfig;
+    const validacao = validarConfig(novaConfig)
 
-    if (!slotMin || !funcionamento) {
+    if (!validacao.valido) {
         return {
             erro: true,
             status: 400,
-            resposta: { error: 'slotMin, funcionamento, servicos são obrigatórios.' }
+            resposta: {
+                error: 'Dados inválido',
+                detalhes: validacao.erros
+            }
         };
-
     }
+
+    const { slotMin, funcionamento } = validacao.dados;
 
 
     config.slotMin = slotMin;
@@ -37,25 +43,28 @@ function gerarProximoId() {
 }
 
 function adicionarServico(novoServico) {
-    const { nome, duracao, preco } = novoServico;
 
-    if (!nome || !duracao || !preco === undefined) {
+    const validacao = validarServico(novoServico);
+    if (!validacao.valido) {
         return {
             erro: true,
             status: 400,
-            resposta: { error: 'nome, duracao e preco são obrigatórios.' }
-        };
+            resposta: {
+                error: 'Dados inválidos',
+                detalhes: validacao.erros
+            }
+        }
     }
+    const { nome, duracao, preco } = validacao.dados;
 
     const id = gerarProximoId();
 
     const servicoCriado = {
         id,
         nome,
-        duracao: Number(duracao),
-        preco: Number(preco)
+        duracao,
+        preco
     };
-
 
     config.servicos.push(servicoCriado);
 
@@ -81,17 +90,23 @@ function atualizarServicoPorId(id, novosDados) {
         };
     }
 
-    const { nome, duracao, preco } = novosDados;
+    const validacao = validarServico(novosDados);
 
-    if (!nome || !duracao || !preco === undefined) {
+    if (!validacao.valido) {
         return {
             erro: true,
             status: 400,
-            resposta: { error: 'nome, duracao e preco são obrigatórios.' }
+            resposta: {
+                error: 'Dado inválidos.',
+                detalhes: validacao.erros
+            }
         };
     }
+    console.log('essa é a validacao:', validacao)
 
-    config.servicos[index] = { ...config.servicos[index], nome, duracao: Number(duracao), preco: Number(preco) };
+    const { nome, duracao, preco } = validacao.dados
+
+    config.servicos[index] = { ...config.servicos[index], nome, duracao, preco };
 
     return {
         erro: false,

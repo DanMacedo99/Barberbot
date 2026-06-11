@@ -42,6 +42,7 @@ function ServicoForm({ onAdicionarServico }) {
                 <input
                     type="number"
                     placeholder="preço"
+                    min={0}
                     value={preco}
                     onChange={(e) => setPreco(e.target.value)}
                 />
